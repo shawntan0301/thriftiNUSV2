@@ -58,12 +58,13 @@ model User {
     id            String    @id @default(cuid())
     name          String
     email         String    @unique
+    bio           String?
     emailVerified DateTime?
     image         String?
     accounts            Account[]
     sessions            Session[]
     posts               Post[]
-    Listing             Listing[]
+    listing             Listing[]
     messages            Message[]
     buyerConversations  Conversation[] @relation("BuyerConversations")
     sellerConversations Conversation[] @relation("SellerConversations")
@@ -79,28 +80,29 @@ model Listing {
     userId      String
     user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     conversations Conversation[]
+    category    String
 }
 
 model Conversation {
-  id           String   @id @default(cuid())
-  buyerId      String
-  sellerId     String
-  listingId    String     // optional: linked to a listing
-  createdAt    DateTime    @default(now())
-  buyer        User     @relation("BuyerConversations", fields: [buyerId], references: [id])
-  seller       User     @relation("SellerConversations", fields: [sellerId], references: [id])
-  listing      Listing  @relation(fields: [listingId], references: [id])
-  messages     Message[]
+    id           String   @id @default(cuid())
+    buyerId      String
+    sellerId     String
+    listingId    String     // optional: linked to a listing
+    createdAt    DateTime    @default(now())
+    buyer        User     @relation("BuyerConversations", fields: [buyerId], references: [id])
+    seller       User     @relation("SellerConversations", fields: [sellerId], references: [id])
+    listing      Listing  @relation(fields: [listingId], references: [id])
+    messages     Message[]
 }
 
 model Message {
-  id              String   @id @default(cuid())
-  conversationId  String
-  senderId        String
-  content         String
-  createdAt       DateTime @default(now())
-  conversation    Conversation @relation(fields: [conversationId], references: [id])
-  sender          User         @relation(fields: [senderId], references: [id])
+    id              String   @id @default(cuid())
+    conversationId  String
+    senderId        String
+    content         String
+    createdAt       DateTime @default(now())
+    conversation    Conversation @relation(fields: [conversationId], references: [id])
+    sender          User         @relation(fields: [senderId], references: [id])
 }
 
 model VerificationToken {

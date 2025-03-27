@@ -74,8 +74,8 @@ export const conversationRouter = createTRPCRouter({
                     }
                 },
                 orderBy: {
-                    // updatedAt: 'desc'
-                    createdAt: 'desc' // temp
+                    updatedAt: 'desc'
+                    
                 }
             });
         }),
@@ -107,12 +107,12 @@ export const conversationRouter = createTRPCRouter({
                 }
             });
 
-            /*
+            
             await ctx.db.conversation.update({
                 where: { id: input.conversationId },
                 data: { updatedAt: new Date() }
             });
-            */
+            
 
             return message;
         }),

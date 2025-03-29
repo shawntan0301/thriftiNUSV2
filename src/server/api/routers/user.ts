@@ -7,8 +7,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const userRouter = createTRPCRouter({
-    
-    createUser: protectedProcedure
+    createUser: publicProcedure
         .input(
         z.object({
             id: z.string(),

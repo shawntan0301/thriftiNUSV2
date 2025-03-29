@@ -117,19 +117,28 @@ export async function POST(req: Request) {
       last_name,
       email_addresses,
       primary_email_address_id,
+      image_url,
     } = payload.data;
 
-    const email = email_addresses.find(
+    const emailObj = email_addresses.find(
       (email) => email.id === primary_email_address_id,
-    )?.email_address;
-
+    );
     const name = `${first_name} ${last_name}`;
+
+    let emailVerifiedDate: Date | undefined = undefined;
+    let email = undefined;
+    if (emailObj && emailObj.verification.status === "verified") {
+      emailVerifiedDate = new Date(emailObj.updated_at);
+      email = emailObj.email_address;
+    }
 
     console.log("userId created:", evt.data.id);
     const user = await api.user.createUser({
       id,
       name,
       email: email ?? "",
+      emailVerified: emailVerifiedDate,
+      image: image_url,
     });
 
     console.log("userId created:", user.id);

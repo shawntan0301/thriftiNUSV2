@@ -2,9 +2,9 @@ import React from "react";
 
 type ListingCardProps = {
   title: string;
-  price: number;
-  imageUrl: string;
-  condition: string;
+  price: string; //testing
+  imageUrl: string | null;
+  condition: string | null;
 };
 
 const ListingCard: React.FC<ListingCardProps> = ({
@@ -16,7 +16,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   return (
     <div className="w-full rounded-lg shadow-sm border p-2 bg-gray-50">
       <img
-        src={imageUrl}
+        src={imageUrl ?? ""}
         alt={title}
         className="w-full h-36 object-cover rounded-md"
       />

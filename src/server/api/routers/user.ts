@@ -73,9 +73,8 @@ export const userRouter = createTRPCRouter({
     //get my listings
     getMyListings: protectedProcedure
         .query(async ({ ctx }) => {
-            return await ctx.db.user.findUnique({
+            return await ctx.db.user.findMany({
             where: { id: ctx.session.userId },
-            include: { listing: true },
             });
         }),
 

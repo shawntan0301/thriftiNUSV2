@@ -14,7 +14,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   condition,
 }) => {
   return (
-    <div className="w-full rounded-lg shadow-sm border p-2 bg-gray-50">
+    <div className="w-full rounded-lg shadow-md p-2 bg-gray-100">
       <img
         src={imageUrl ?? ""}
         alt={title}

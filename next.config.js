@@ -3,17 +3,20 @@
  * for Docker builds.
  */
 import "./src/env.js";
-
-// /** @type {import("next").NextConfig} */
-// const config = {};
-
-// export default config;
+import path from "path";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
-  };
-  
-  export default nextConfig;
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": path.resolve(__dirname, "src"),
+    };
+    return config;
+  },
+};
+
+export default nextConfig;

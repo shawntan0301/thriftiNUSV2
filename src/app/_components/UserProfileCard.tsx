@@ -14,7 +14,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   // totalListings,
 }) => {
   return (
-    <div className="rounded-lg border p-4 shadow-sm w-full bg-gray-50">
+    <div className="rounded-lg p-4 shadow-md w-full bg-gray-100">
       <div className="flex items-center gap-4">
         <img
           src={image ?? "/default-profile.jpg"}

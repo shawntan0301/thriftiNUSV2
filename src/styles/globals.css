@@ -61,6 +61,12 @@
 .text-secondaryAccent {
   color: var(--secondary-accent);
 }
+.bg-primaryAccent {
+  background-color: var(--primary-accent);
+}
+.bg-secondaryAccent {
+  background-color: var(--secondary-accent);
+}
 
 
 .dark {

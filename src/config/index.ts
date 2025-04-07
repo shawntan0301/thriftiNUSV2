@@ -1,45 +1,87 @@
 // create a bunch of categories for the NavItem
 export const PRODUCT_CATEGORIES = [
     {
-      label: 'UI Kits',
-      value: 'ui_kits' as const, // needs '_' cause spaces are not serialisable. if we use this value (with spaces) in the url, it will be a problem
+      label: 'Electronics',
+      value: 'electronics' as const,
+      href: '/products?category=electronics',
       featured: [
         {
-          name: 'Editor picks',
-          href: `/products?category=ui_kits`,
-          imageSrc: '/nav/ui-kits/mixed.jpg',
+          name: 'Computers & Mobile Phones',
+          href: '/products?category=electronics&subcategory=computers-mobile',
         },
         {
-          name: 'New Arrivals',
-          href: '/products?category=ui_kits&sort=desc',
-          imageSrc: '/nav/ui-kits/blue.jpg',
+          name: 'Keyboards & Mouses',
+          href: '/products?category=electronics&subcategory=keyboards-mouses',
         },
         {
-          name: 'Bestsellers',
-          href: '/products?category=ui_kits',
-          imageSrc: '/nav/ui-kits/purple.jpg',
+          name: 'TV & Home Appliances',
+          href: '/products?category=electronics&subcategory=tv-home-appliances',
+        },
+        {
+          name: 'Audio & Photography',
+          href: '/products?category=electronics&subcategory=audio-photography',
+        },
+        {
+          name: 'Lights & Chargers',
+          href: '/products?category=electronics&subcategory=lights-chargers',
+        },
+        {
+          name: 'Video Games & Other Tech',
+          href: '/products?category=electronics&subcategory=video-games-others',
         },
       ],
     },
     {
-      label: 'Icons',
-      value: 'icons' as const,
+      label: 'Fashion',
+      value: 'fashion' as const,
+      href: '/products?category=fashion',
       featured: [
         {
-          name: 'Favorite Icon Picks',
-          href: `/products?category=icons`,
-          imageSrc: '/nav/icons/picks.jpg',
+          name: 'Women\'s Fashion',
+          href: '/products?category=fashion&subcategory=womens-fashion',
         },
         {
-          name: 'New Arrivals',
-          href: '/products?category=icons&sort=desc',
-          imageSrc: '/nav/icons/new.jpg',
+          name: 'Men\'s Fashion',
+          href: '/products?category=fashion&subcategory=mens-fashion',
+        },
+      ],
+    },
+    {
+      label: 'Bedding',
+      value: 'bedding' as const,
+      href: '/products?category=bedding',
+      featured: [
+        {
+          name: 'Bedsheets',
+          href: '/products?category=bedding&subcategory=bedsheets',
         },
         {
-          name: 'Bestselling Icons',
-          href: '/products?category=icons',
-          imageSrc: '/nav/icons/bestsellers.jpg',
+          name: 'Pillows',
+          href: '/products?category=bedding&subcategory=pillows',
         },
+        {
+          name: 'Blankets',
+          href: '/products?category=bedding&subcategory=blankets',
+        },
+      ],
+    },
+    {
+      label: 'Cleaning',
+      value: 'cleaning' as const,
+      href: '/products?category=cleaning',
+      featured: [
+        {
+          name: 'Laundry',
+          href: '/products?category=cleaning&subcategory=laundry',
+        },
+        {
+          name: 'Kitchen Cleaning',
+          href: '/products?category=cleaning&subcategory=kitchen-cleaning',
+        },
+        {
+          name: 'Bathroom Cleaning',
+          href: '/products?category=cleaning&subcategory=bathroom-cleaning',
+        }
       ],
     },
   ]

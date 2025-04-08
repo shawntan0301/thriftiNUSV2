@@ -52,15 +52,18 @@ model User {
     bio           String?
     emailVerified DateTime?
     image         String?
+
     accounts            Account[]
     sessions            Session[]
     listing             Listing[]
     messages            Message[]
+
     buyerConversations  Conversation[] @relation("BuyerConversations")
     sellerConversations Conversation[] @relation("SellerConversations")
     savedListings Listing[] @relation("SavedListings")
     authoredReviews     Review[]       @relation("AuthoredReviews")   
-    receivedReviews     Review[]       @relation("ReceivedReviews")  
+    receivedReviews     Review[]       @relation("ReceivedReviews")
+    cart                Cart[]      
 }
 
 model Listing {
@@ -82,6 +85,7 @@ model Listing {
     user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
     conversations Conversation[]
     savedBy       User[]        @relation("SavedListings") 
+    cart        Cart[]        @relation(fields: [], references: [])
 
 }
 
@@ -117,6 +121,19 @@ model Message {
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   sender         User         @relation(fields: [senderId], references: [id])
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId]) 
 }
 
 model VerificationToken {

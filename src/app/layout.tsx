@@ -1,6 +1,6 @@
 import "~/styles/globals.css";
 import { cn } from "../lib/utils";
-import Navbar  from "./_components/Navbar";
+import Navbar from "./_components/Navbar";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Inter } from "next/font/google";
@@ -32,22 +32,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         className={cn("antialised relative h-full font-sans", inter.className)}
       >
         <ClerkProvider>
           <TRPCReactProvider>
             <main className="relative flex min-h-screen flex-col">
               {/* <Providers> */}
-                <Navbar />
-                <div className="flex-1 flex-grow">{children}</div>
-                {/* <Footer />
+              <Navbar />
+              <div className="flex-1 flex-grow">{children}</div>
+              {/* <Footer />
               </Providers> */}
             </main>
           </TRPCReactProvider>
         </ClerkProvider>
-        <NextSSRPlugin
-          routerConfig={extractRouterConfig(ourFileRouter)}
-        />
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
       </body>
     </html>
   );

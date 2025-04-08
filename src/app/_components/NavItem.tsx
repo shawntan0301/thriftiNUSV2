@@ -1,6 +1,6 @@
 "use client";
 
-import { PRODUCT_CATEGORIES } from "../../config";
+import { type PRODUCT_CATEGORIES } from "../../config";
 import { Button } from "./ui/button";
 import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -34,6 +34,7 @@ const NavItem = ({
         >
           {category.label}
           <ChevronDown
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             className={cn("text-muted-foreground h-4 w-4 transition-all", {
               "-rotate-180": isOpen,
             })} // rotate the chevron when open, done conditionally
@@ -44,6 +45,7 @@ const NavItem = ({
       {isOpen ? (
         <div
           onClick={() => close()}
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           className={cn(
             "text-muted-foreground absolute inset-x-0 top-full text-sm",
             {

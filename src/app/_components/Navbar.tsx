@@ -1,17 +1,12 @@
 import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
-import ThriftiNUS from "public/ThriftiNUS.svg";
 import NavItems from "./NavItems";
 import { buttonVariants } from "./ui/button";
 import Cart from "./Cart";
 import { currentUser } from "@clerk/nextjs/server";
 // import MobileNav from './MobileNav'
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import Image from "next/image";
 
 const Navbar = async () => {
   const user = await currentUser();
@@ -26,10 +21,11 @@ const Navbar = async () => {
               {/* logo */}
               <div className="ml-4 flex lg:ml-0">
                 <Link href="/">
-                  <img
-                    src={ThriftiNUS.src}
+                  <Image
+                    src="/ThriftiNUS.svg"
                     alt="ThriftiNUS"
-                    className="h-3 w-auto"
+                    height={12}
+                    width={80}
                   />
                 </Link>
               </div>
@@ -43,6 +39,7 @@ const Navbar = async () => {
                 <SignedOut>
                   <SignInButton mode="modal">
                     <button
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
                       className={buttonVariants({
                         variant: "ghost",
                       })}
@@ -58,13 +55,14 @@ const Navbar = async () => {
                   <span>
                     Hello,{" "}
                     <span className="text-secondaryAccent font-semibold">
-                      {user?.firstName || "User"}
+                      {user?.firstName ?? "User"}
                     </span>
                   </span>
                   <div className="ml-4 flow-root lg:ml-6">
                     {/* <Cart /> */}
                     <Link
                       href="/sell"
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
                       className={buttonVariants({
                         variant: "secondary",
                       })}

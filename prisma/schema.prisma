@@ -46,71 +46,70 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String
-    email         String    @unique
-    bio           String?
-    emailVerified DateTime?
-    image         String?
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  bio           String?
+  emailVerified DateTime?
+  image         String?
 
-    accounts            Account[]
-    sessions            Session[]
-    listing             Listing[]
-    messages            Message[]
+  accounts Account[]
+  sessions Session[]
+  listing  Listing[]
+  messages Message[]
 
-    buyerConversations  Conversation[] @relation("BuyerConversations")
-    sellerConversations Conversation[] @relation("SellerConversations")
-    savedListings Listing[] @relation("SavedListings")
-    authoredReviews     Review[]       @relation("AuthoredReviews")   
-    receivedReviews     Review[]       @relation("ReceivedReviews")
-    cart                Cart[]      
+  buyerConversations  Conversation[] @relation("BuyerConversations")
+  sellerConversations Conversation[] @relation("SellerConversations")
+  savedListings       Listing[]      @relation("SavedListings")
+  authoredReviews     Review[]       @relation("AuthoredReviews")
+  receivedReviews     Review[]       @relation("ReceivedReviews")
+  cart                Cart[]
 }
 
 model Listing {
-    id            String        @id @default(cuid())
-    title         String
-    description   String
-    price         Float
-    imageUrl      String
-    brand         String?
-    createdAt     DateTime      @default(now())
-    userId        String
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  imageUrl    String
+  brand       String?
+  createdAt   DateTime @default(now())
+  userId      String
 
-    //enums
-    category      Category       
-    condition     Condition
-    dealMethods   DealMethod[]  
-    status        Status        @default(AVAILABLE)
-    
-    user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-    conversations Conversation[]
-    savedBy       User[]        @relation("SavedListings") 
-    cart        Cart[]        @relation(fields: [], references: [])
+  //enums
+  category    Category
+  condition   Condition
+  dealMethods DealMethod[]
+  status      Status       @default(AVAILABLE)
 
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  savedBy       User[]         @relation("SavedListings")
+  cart          Cart[]         @relation(fields: [], references: [])
 }
 
 model Review {
-    id         String   @id @default(cuid())
-    content    String
-    rating     Int
-    createdAt  DateTime @default(now())
-    authorId   String
-    author     User     @relation("AuthoredReviews", fields: [authorId], references: [id], onDelete: Cascade)
-    targetUserId String
-    targetUser   User     @relation("ReceivedReviews", fields: [targetUserId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  content      String
+  rating       Int
+  createdAt    DateTime @default(now())
+  authorId     String
+  author       User     @relation("AuthoredReviews", fields: [authorId], references: [id], onDelete: Cascade)
+  targetUserId String
+  targetUser   User     @relation("ReceivedReviews", fields: [targetUserId], references: [id], onDelete: Cascade)
 }
 
 model Conversation {
-    id           String   @id @default(cuid())
-    buyerId      String
-    sellerId     String
-    listingId    String    
-    createdAt    DateTime    @default(now())   
-    updatedAt    DateTime  @default(now())
-    buyer        User     @relation("BuyerConversations", fields: [buyerId], references: [id])
-    seller       User     @relation("SellerConversations", fields: [sellerId], references: [id])
-    listing      Listing  @relation(fields: [listingId], references: [id])
-    messages     Message[]
+  id        String    @id @default(cuid())
+  buyerId   String
+  sellerId  String
+  listingId String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id])
+  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id])
+  listing   Listing   @relation(fields: [listingId], references: [id])
+  messages  Message[]
 }
 
 model Message {
@@ -124,16 +123,16 @@ model Message {
 }
 
 model Cart {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@unique([userId, listingId]) 
+  @@unique([userId, listingId])
 }
 
 model VerificationToken {
@@ -145,31 +144,31 @@ model VerificationToken {
 }
 
 enum Condition {
-    BRAND_NEW
-    LIKE_NEW
-    LIGHTLY_USED
-    WELL_USED
-    HEAVILY_USED
+  BRAND_NEW
+  LIKE_NEW
+  LIGHTLY_USED
+  WELL_USED
+  HEAVILY_USED
 }
 
 enum Status {
-    AVAILABLE
-    RESERVED
-    SOLD
+  AVAILABLE
+  RESERVED
+  SOLD
 }
 
 //add more if needed
 enum DealMethod {
-    DECK
-    COM1
-    FASS
-    TERRACE
-    BIZ
+  DECK
+  COM1
+  FASS
+  TERRACE
+  BIZ
 }
 
 enum Category {
-    ELECTRONICS
-    FASHION
-    BOOKS
-    STATIONERY
+  ELECTRONICS
+  FASHION
+  BOOKS
+  STATIONERY
 }

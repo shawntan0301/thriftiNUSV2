@@ -64,19 +64,35 @@ export const userRouter = createTRPCRouter({
     getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
         const user = await ctx.db.user.findUnique({
             where: { id: ctx.session.userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+                bio: true,
+            },
         });
     
         return user;
     }),
     
     //get my listings
-    getMyListings: protectedProcedure
-        .query(async ({ ctx }) => {
-            return await ctx.db.user.findMany({
-            where: { id: ctx.session.userId },
-            });
-        }),
-
+    getMyListings: protectedProcedure.query(async ({ ctx }) => {
+        return await ctx.db.listing.findMany({
+          where: { userId: ctx.session.userId },
+          orderBy: {
+            createdAt: "desc", // optional but helpful
+          },
+          select: {
+            id: true,
+            title: true,
+            price: true,
+            imageUrl: true,
+            condition: true,
+          },
+        });
+      }),
+      
     // get listings of other users 
     getOtherUserListings: publicProcedure
         .input(z.object({ userId: z.string() }))

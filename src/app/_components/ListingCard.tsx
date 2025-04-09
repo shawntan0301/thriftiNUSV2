@@ -1,18 +1,14 @@
 import React from "react";
 
 type ListingCardProps = {
+  id: string;
   title: string;
-  price: string; //testing
-  imageUrl: string | null;
-  condition: string | null;
+  price: number;
+  imageUrl: string;
+  condition: string;
 };
 
-const ListingCard: React.FC<ListingCardProps> = ({
-  title,
-  price,
-  imageUrl,
-  condition,
-}) => {
+const ListingCard: React.FC<ListingCardProps> = ({ id, title, price, imageUrl, condition }) => {
   return (
     <div className="w-full rounded-lg shadow-md p-2 bg-gray-100">
       <img
@@ -22,7 +18,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       />
       <div className="mt-2">
         <h3 className="text-sm font-medium">{title}</h3>
-        <p className="text-sm text-gray-500">S${price}</p>
+        <p className="text-sm text-gray-500">${price}</p>
         <p className="text-xs text-gray-400">{condition}</p>
       </div>
     </div>

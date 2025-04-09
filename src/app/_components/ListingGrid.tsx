@@ -1,12 +1,13 @@
 import React from "react";
 import ListingCard from "./ListingCard";
+import { Condition } from "@prisma/client";
 
 type Listing = {
   id: string;
   title: string;
   price: number;
   imageUrl: string;
-  condition: string;
+  condition: Condition;
 };
 
 type ListingGridProps = {

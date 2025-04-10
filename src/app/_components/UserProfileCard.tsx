@@ -44,6 +44,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
         <div>
           <h2 className="text-xl font-bold">{name}</h2>
           <p className="text-sm text-gray-500">{totalListings} Listings</p>
+          <p className="text-sm text-gray-500">{bio}</p>
         </div>
       </div>
 

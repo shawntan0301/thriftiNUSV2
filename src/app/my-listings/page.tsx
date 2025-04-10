@@ -9,12 +9,12 @@ import ReviewsGrid from "../_components/ReviewsGrid";
 export default function ProfilePage() {
   const { data: user } = api.user.getCurrentUser.useQuery();
   const { data: listings } = api.user.getMyListings.useQuery();
-  const { data: reviewsData } = api.user.getMyReviews.useQuery(); // updated line
+  const { data: reviewsData } = api.user.getMyReviews.useQuery();
 
   const [activeTab, setActiveTab] = useState<"listings" | "reviews">("listings");
 
   const reviews = reviewsData?.reviews ?? [];
-  const averageRating = reviewsData?.averageRating ?? null;
+  const averageRating = reviewsData?.averageRating ?? 0;
 
   if (!user || !listings || !reviewsData) return <div>Loading...</div>;
 
@@ -24,6 +24,10 @@ export default function ProfilePage() {
         name={user.name}
         image={user.image}
         bio={user.bio}
+        totalListings={listings.length}
+        averageRating={averageRating}
+        totalReviews={reviews.length}
+        joinedAt={new Date(user.createdAt)}
       />
 
       {/* Tab Navigation */}
@@ -31,7 +35,9 @@ export default function ProfilePage() {
         <button
           onClick={() => setActiveTab("listings")}
           className={`pb-2 font-semibold ${
-            activeTab === "listings" ? "text-blue-900 border-b-2 border-blue-900" : "text-gray-500"
+            activeTab === "listings"
+              ? "text-blue-900 border-b-2 border-blue-900"
+              : "text-gray-500"
           }`}
         >
           Listings
@@ -39,7 +45,9 @@ export default function ProfilePage() {
         <button
           onClick={() => setActiveTab("reviews")}
           className={`pb-2 font-semibold ${
-            activeTab === "reviews" ? "text-blue-900 border-b-2 border-blue-900" : "text-gray-500"
+            activeTab === "reviews"
+              ? "text-blue-900 border-b-2 border-blue-900"
+              : "text-gray-500"
           }`}
         >
           Reviews
@@ -48,7 +56,9 @@ export default function ProfilePage() {
 
       {/* Tab Content */}
       {activeTab === "listings" && <ListingGrid listings={listings} />}
-      {activeTab === "reviews" && <ReviewsGrid reviews={reviews} averageRating={averageRating} />}
+      {activeTab === "reviews" && (
+        <ReviewsGrid reviews={reviews} averageRating={averageRating} />
+      )}
     </div>
   );
 }

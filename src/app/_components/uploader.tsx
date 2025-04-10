@@ -13,7 +13,7 @@ export default function Uploader({ onImageUploaded }: { onImageUploaded?: (image
         onClientUploadComplete={(res) => {
           if (res && res[0]) {
            
-            const uploadedUrl = (res[0] as any).imageUrl; 
+            const uploadedUrl = (res[0] as any).url;
             console.log("File uploaded:", uploadedUrl);
             
             // Store the URL in state

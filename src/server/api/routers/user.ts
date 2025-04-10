@@ -89,6 +89,7 @@ export const userRouter = createTRPCRouter({
             price: true,
             imageUrl: true,
             condition: true,
+            status: true,
           },
         });
       }),

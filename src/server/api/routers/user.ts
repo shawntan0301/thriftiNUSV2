@@ -96,7 +96,7 @@ export const userRouter = createTRPCRouter({
 
     //get my reviews
     getMyReviews: protectedProcedure.query(async ({ ctx }) => {
-        return await ctx.db.review.findMany({
+        const reviews = await ctx.db.review.findMany({
           where: { targetUserId: ctx.session.userId },
           orderBy: { createdAt: "desc" },
           select: {
@@ -112,7 +112,15 @@ export const userRouter = createTRPCRouter({
             },
           },
         });
+      
+        const total = reviews.length;
+        const averageRating = total > 0
+          ? parseFloat((reviews.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1))
+          : null;
+      
+        return { reviews, averageRating };
       }),
+      
       
     // get listings of other users 
     getOtherUserListings: publicProcedure

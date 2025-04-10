@@ -9,10 +9,14 @@ import ReviewsGrid from "../_components/ReviewsGrid";
 export default function ProfilePage() {
   const { data: user } = api.user.getCurrentUser.useQuery();
   const { data: listings } = api.user.getMyListings.useQuery();
-  const { data: reviews } = api.user.getMyReviews.useQuery();
+  const { data: reviewsData } = api.user.getMyReviews.useQuery(); // updated line
+
   const [activeTab, setActiveTab] = useState<"listings" | "reviews">("listings");
 
-  if (!user || !listings || !reviews) return <div>Loading...</div>;
+  const reviews = reviewsData?.reviews ?? [];
+  const averageRating = reviewsData?.averageRating ?? null;
+
+  if (!user || !listings || !reviewsData) return <div>Loading...</div>;
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-6">
@@ -44,8 +48,7 @@ export default function ProfilePage() {
 
       {/* Tab Content */}
       {activeTab === "listings" && <ListingGrid listings={listings} />}
-
-      {activeTab === "reviews" && <ReviewsGrid reviews={reviews} />}
+      {activeTab === "reviews" && <ReviewsGrid reviews={reviews} averageRating={averageRating} />}
     </div>
   );
 }

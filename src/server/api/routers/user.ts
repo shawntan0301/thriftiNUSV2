@@ -93,6 +93,26 @@ export const userRouter = createTRPCRouter({
           },
         });
       }),
+
+    //get my reviews
+    getMyReviews: protectedProcedure.query(async ({ ctx }) => {
+        return await ctx.db.review.findMany({
+          where: { targetUserId: ctx.session.userId },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            createdAt: true,
+            rating: true,
+            content: true,
+            author: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        });
+      }),
       
     // get listings of other users 
     getOtherUserListings: publicProcedure

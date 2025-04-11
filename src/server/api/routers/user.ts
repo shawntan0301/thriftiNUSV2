@@ -36,28 +36,27 @@ export const userRouter = createTRPCRouter({
             return await ctx.db.user.delete({ where: { id: input.id }});
         }),
 
-    //updateUser 
+    // update user profile
     updateUserProfile: protectedProcedure
-        .input(
-            z.object({
-                name: z.string().min(1).optional(),
-                bio: z.string().optional(),
-                image: z.string().url().optional(),
-            })
-        )
-        .mutation(async ({ ctx, input }) => {
-            const updatedUser = await ctx.db.user.update({
-                where: { id: ctx.session.userId },
-                data: {
-                    name: input.name,
-                    //test if original empty bio will give error upon editting another empty bio
-                    bio: input.bio,
-                    image: input.image,
-                },
-            });
-
-            return updatedUser;
-        }),
+    .input(
+      z.object({
+        name: z.string().min(1).optional(),
+        bio: z.string().optional(),
+        image: z.string().url().nullable().optional(), // null = remove photo
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedUser = await ctx.db.user.update({
+        where: { id: ctx.session.userId },
+        data: {
+          name: input.name,
+          bio: input.bio,
+          image: input.image, // frontend already handles fallback
+        },
+      });
+  
+      return updatedUser;
+    }),  
 
 
     //get my own profile 
@@ -70,6 +69,7 @@ export const userRouter = createTRPCRouter({
                 email: true,
                 image: true,
                 bio: true,
+                createdAt: true,
             },
         });
     
@@ -93,6 +93,34 @@ export const userRouter = createTRPCRouter({
           },
         });
       }),
+
+    //get my reviews
+    getMyReviews: protectedProcedure.query(async ({ ctx }) => {
+        const reviews = await ctx.db.review.findMany({
+          where: { targetUserId: ctx.session.userId },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            createdAt: true,
+            rating: true,
+            content: true,
+            author: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        });
+      
+        const total = reviews.length;
+        const averageRating = total > 0
+          ? parseFloat((reviews.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1))
+          : null;
+      
+        return { reviews, averageRating };
+      }),
+      
       
     // get listings of other users 
     getOtherUserListings: publicProcedure

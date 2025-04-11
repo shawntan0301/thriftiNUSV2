@@ -36,28 +36,27 @@ export const userRouter = createTRPCRouter({
             return await ctx.db.user.delete({ where: { id: input.id }});
         }),
 
-    //updateUser 
+    // update user profile
     updateUserProfile: protectedProcedure
-        .input(
-            z.object({
-                name: z.string().min(1).optional(),
-                bio: z.string().optional(),
-                image: z.string().url().optional(),
-            })
-        )
-        .mutation(async ({ ctx, input }) => {
-            const updatedUser = await ctx.db.user.update({
-                where: { id: ctx.session.userId },
-                data: {
-                    name: input.name,
-                    //test if original empty bio will give error upon editting another empty bio
-                    bio: input.bio,
-                    image: input.image,
-                },
-            });
-
-            return updatedUser;
-        }),
+    .input(
+      z.object({
+        name: z.string().min(1).optional(),
+        bio: z.string().optional(),
+        image: z.string().url().nullable().optional(), // null = remove photo
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedUser = await ctx.db.user.update({
+        where: { id: ctx.session.userId },
+        data: {
+          name: input.name,
+          bio: input.bio,
+          image: input.image, // frontend already handles fallback
+        },
+      });
+  
+      return updatedUser;
+    }),  
 
 
     //get my own profile 

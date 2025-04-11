@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { MoreVertical, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import Link from "next/link";
 
 type UserProfileCardProps = {
   name: string;
@@ -11,6 +12,7 @@ type UserProfileCardProps = {
   averageRating?: number;
   totalReviews?: number;
   joinedAt: Date;
+  isOwnProfile?: boolean; // NEW
 };
 
 const getTimeSinceJoined = (joinedDate: Date): string => {
@@ -30,6 +32,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   averageRating = 5.0,
   totalReviews = 0,
   joinedAt,
+  isOwnProfile = false, // default false
 }) => {
   return (
     <div className="rounded-xl p-4 shadow-md w-full bg-gray-100 flex items-center justify-between">
@@ -44,7 +47,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
         <div>
           <h2 className="text-xl font-bold">{name}</h2>
           <p className="text-sm text-gray-500">{totalListings} Listings</p>
-          <p className="text-sm text-gray-500">{bio}</p>
+          <p className="text-sm text-gray-500">{bio ?? "No bio yet"}</p>
         </div>
       </div>
 
@@ -63,10 +66,18 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
         </div>
       </div>
 
-      {/* 3-dot menu */}
-      <button className="rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-200">
-        <MoreVertical className="w-5 h-5 text-gray-500" />
-      </button>
+      {/* edit button or 3-dots.    logged in user's profile: edit button     others profile: 3-dots for report function*/}
+      {isOwnProfile ? (
+        <Link href="/edit-profile">
+          <button className="rounded-full px-4 py-2 text-sm bg-blue-900 text-white hover:bg-blue-800">
+            Edit Profile
+          </button>
+        </Link>
+      ) : (
+        <button className="rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-200">
+          <span className="text-lg">⋮</span>
+        </button>
+      )}
     </div>
   );
 };

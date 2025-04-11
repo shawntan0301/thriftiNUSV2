@@ -10,6 +10,18 @@ export default function Uploader({ onImageUploaded }: { onImageUploaded?: (image
     <main className="flex flex-col items-center justify-between">
       <UploadButton
         endpoint="imageUploader"
+
+
+        // added a visible button
+        appearance={{
+          button: "px-4 py-2 bg-gray-400 text-gray-700 rounded-md font-semibold hover:bg-gray-300 transition",
+          container: "", // removes extra spacing
+        }}
+        content={{
+          button: "Upload a photo",
+        }}
+
+        
         onClientUploadComplete={(res) => {
           if (res && res[0]) {
            
@@ -35,7 +47,7 @@ export default function Uploader({ onImageUploaded }: { onImageUploaded?: (image
       
       {imageUrl && (
         <div className="mt-4">
-          <p className="text-sm">Uploaded image URL: {imageUrl}</p>
+          { /*<p className="text-sm">Uploaded image URL: {imageUrl}</p>    commented to remove the ugly url first (show preview instead) */}
         </div>
       )}
     </main>

@@ -28,6 +28,7 @@ export default function ProfilePage() {
         averageRating={averageRating}
         totalReviews={reviews.length}
         joinedAt={new Date(user.createdAt)}
+        isOwnProfile={true} // to reuse this page for view others profiles
       />
 
       {/* Tab Navigation */}

@@ -14,7 +14,7 @@ export const listingsRouter = createTRPCRouter({
         title: z.string().min(1),
         description: z.string().min(1),
         price: z.number().nonnegative(),
-        imageUrl: z.string().url(),
+        imageUrls: z.array(z.string().url()),
         brand: z.string().optional(),
         category: z.nativeEnum(Category),
         condition: z.nativeEnum(Condition),
@@ -37,7 +37,7 @@ export const listingsRouter = createTRPCRouter({
         title: z.string().optional(),
         description: z.string().optional(),
         price: z.number().optional(),
-        imageUrl: z.string().url().optional(),
+        imageUrls: z.array(z.string().url()).optional(), // Changed from imageUrl to imageUrls
         brand: z.string().optional(),
         category: z.nativeEnum(Category).optional(),
         condition: z.nativeEnum(Condition).optional(),
@@ -62,7 +62,7 @@ export const listingsRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           price: input.price,
-          imageUrl: input.imageUrl,
+          imageUrls: input.imageUrls, // Changed from imageUrl to imageUrls
           brand: input.brand,
           category: input.category,
           condition: input.condition,

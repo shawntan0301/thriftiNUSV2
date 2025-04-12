@@ -2,40 +2,42 @@
 
 import { UploadButton } from "~/utils/uploadthing";
 import { useState } from "react";
+import Image from "next/image";
 
-export default function Uploader({ onImageUploaded }: { onImageUploaded?: (imageUrl: string) => void }) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+export default function Uploader({
+  onImageUploaded
+}: {
+  onImageUploaded?: (imageUrls: string[]) => void
+}) {
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   return (
     <main className="flex flex-col items-center justify-between">
       <UploadButton
         endpoint="imageUploader"
-
-
-        // added a visible button
         appearance={{
           button: "px-4 py-2 bg-gray-400 text-gray-700 rounded-md font-semibold hover:bg-gray-300 transition",
           container: "", // removes extra spacing
         }}
         content={{
-          button: "Upload a photo",
+          button: imageUrls.length > 0 ? "Upload more photos" : "Upload photos",
         }}
 
-        
         onClientUploadComplete={(res) => {
-          if (res && res[0]) {
-           
-            const uploadedUrl = (res[0] as any).url;
-            console.log("File uploaded:", uploadedUrl);
-            
-            // Store the URL in state
-            setImageUrl(uploadedUrl);
-            
-            // If a callback was provided, call it with the URL
+          if (res && res.length > 0) {
+            // Extract all URLs from the response
+            const newUrls = res.map((file) => (file as any).url);
+            console.log("Files uploaded:", newUrls);
+
+            // Update state with all URLs
+            const updatedUrls = [...imageUrls, ...newUrls];
+            setImageUrls(updatedUrls);
+
+            // If a callback was provided, call it with all URLs
             if (onImageUploaded) {
-              onImageUploaded(uploadedUrl);
+              onImageUploaded(updatedUrls);
             }
-            
+
             alert("Upload Completed");
           }
         }}
@@ -44,10 +46,31 @@ export default function Uploader({ onImageUploaded }: { onImageUploaded?: (image
           alert(`ERROR! ${error.message}`);
         }}
       />
-      
-      {imageUrl && (
-        <div className="mt-4">
-          { /*<p className="text-sm">Uploaded image URL: {imageUrl}</p>    commented to remove the ugly url first (show preview instead) */}
+
+      {imageUrls.length > 0 && (
+        <div className="mt-4 w-full">
+          <p className="text-sm font-medium mb-2">Uploaded Images ({imageUrls.length})</p>
+          <div className="flex flex-wrap gap-2">
+            {imageUrls.map((url, index) => (
+              <div key={index} className="relative w-24 h-24">
+                <img
+                  src={url}
+                  alt={`Upload ${index + 1}`}
+                  className="w-full h-full object-cover rounded-md"
+                />
+                <button
+                  onClick={() => {
+                    const newUrls = imageUrls.filter((_, i) => i !== index);
+                    setImageUrls(newUrls);
+                    if (onImageUploaded) onImageUploaded(newUrls);
+                  }}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </main>

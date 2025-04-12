@@ -73,7 +73,7 @@ model Listing {
   title       String
   description String
   price       Float
-  imageUrl    String
+  imageUrls   String[]
   brand       String?
   createdAt   DateTime @default(now())
   userId      String

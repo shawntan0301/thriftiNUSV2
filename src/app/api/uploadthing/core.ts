@@ -10,7 +10,7 @@ export const ourFileRouter = {
   imageUploader: f({
     image: {
       maxFileSize: "4MB",
-      maxFileCount: 1,
+      maxFileCount: 5,
     },
   })
     // Set permissions and file types for this FileRoute
@@ -31,9 +31,9 @@ export const ourFileRouter = {
       console.log("file url", file.ufsUrl);
 
       // Return both the image URL and user info to the client
-      return { 
+      return {
         uploadedBy: metadata.userId,
-        imageUrl: file.ufsUrl 
+        imageUrl: file.ufsUrl
       };
     }),
 } satisfies FileRouter;

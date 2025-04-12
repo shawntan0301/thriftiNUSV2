@@ -18,7 +18,7 @@ export default function SellPage() {
   const [brand, setBrand] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [condition, setCondition] = useState<Condition | null>(null);
   const [dealMethods, setDealMethods] = useState<DealMethod[]>([]);
@@ -34,19 +34,18 @@ export default function SellPage() {
   });
 
   const handleSubmit = () => {
-
     // for debugging 
     console.log({
-        title,
-        description,
-        price,
-        imageUrl,
-        category,
-        condition,
-        dealMethods,
-      });
-      
-    if (!title || !description || !price || !imageUrl || !category || !condition || dealMethods.length === 0) {
+      title,
+      description,
+      price,
+      imageUrls,
+      category,
+      condition,
+      dealMethods,
+    });
+
+    if (!title || !description || !price || imageUrls.length === 0 || !category || !condition || dealMethods.length === 0) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -55,7 +54,7 @@ export default function SellPage() {
       title,
       description,
       price,
-      imageUrl,
+      imageUrls,  // Changed from imageUrl to imageUrls
       brand,
       category,
       condition,
@@ -65,7 +64,7 @@ export default function SellPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <Uploader onImageUploaded={(url) => setImageUrl(url)} />
+      <Uploader onImageUploaded={(urls) => setImageUrls(urls)} />
       <CategorySelector value={category} onChange={setCategory} />
       <ConditionSelector value={condition} onChange={setCondition} />
       <ItemDetailsForm

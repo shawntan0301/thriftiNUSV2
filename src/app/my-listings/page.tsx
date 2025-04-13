@@ -56,7 +56,14 @@ export default function ProfilePage() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === "listings" && <ListingGrid listings={listings} />}
+      {activeTab === "listings" && (
+        <ListingGrid
+          listings={listings.map((listing) => ({
+            ...listing,
+            imageUrls: listing.imageUrls, // Ensure imageUrls is a flat array
+          }))}
+        />
+      )}
       {activeTab === "reviews" && (
         <ReviewsGrid reviews={reviews} averageRating={averageRating} />
       )}

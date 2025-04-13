@@ -7,17 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model Post {
-//   id          Int      @id @default(autoincrement())
-//   name        String
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-//   createdById String
-//   createdBy   User     @relation(fields: [createdById], references: [id])
-
-//   @@index([name])
-// }
-
 model Account {
   id                       String  @id @default(cuid())
   userId                   String
@@ -46,48 +35,42 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  bio           String?
-  emailVerified DateTime?
-  image         String?
-
-  createdAt     DateTime  @default(now())
-
-  accounts Account[]
-  sessions Session[]
-  listing  Listing[]
-  messages Message[]
-
+  id                  String         @id @default(cuid())
+  name                String
+  email               String         @unique
+  bio                 String?
+  emailVerified       DateTime?
+  image               String?
+  createdAt           DateTime       @default(now())
+  accounts            Account[]
+  cart                Cart?
   buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
-  savedListings       Listing[]      @relation("SavedListings")
+  listing             Listing[]
+  messages            Message[]
   authoredReviews     Review[]       @relation("AuthoredReviews")
   receivedReviews     Review[]       @relation("ReceivedReviews")
-  cart                Cart[]
+  sessions            Session[]
+  savedListings       Listing[]      @relation("SavedListings")
 }
 
 model Listing {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  price       Float
-  imageUrls   String[]
-  brand       String?
-  createdAt   DateTime @default(now())
-  userId      String
-
-  //enums
-  category    Category
-  condition   Condition
-  dealMethods DealMethod[]
-  status      Status       @default(AVAILABLE)
-
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  price         Float
+  createdAt     DateTime       @default(now())
+  userId        String
+  brand         String?
+  condition     Condition
+  dealMethods   DealMethod[]
+  status        Status         @default(AVAILABLE)
+  category      Category
+  imageUrls     String[]
+  cart          Cart[]
   conversations Conversation[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedBy       User[]         @relation("SavedListings")
-  cart          Cart[]         @relation(fields: [], references: [])
 }
 
 model Review {
@@ -96,8 +79,8 @@ model Review {
   rating       Int
   createdAt    DateTime @default(now())
   authorId     String
-  author       User     @relation("AuthoredReviews", fields: [authorId], references: [id], onDelete: Cascade)
   targetUserId String
+  author       User     @relation("AuthoredReviews", fields: [authorId], references: [id], onDelete: Cascade)
   targetUser   User     @relation("ReceivedReviews", fields: [targetUserId], references: [id], onDelete: Cascade)
 }
 
@@ -109,8 +92,8 @@ model Conversation {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id])
-  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id])
   listing   Listing   @relation(fields: [listingId], references: [id])
+  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id])
   messages  Message[]
 }
 
@@ -125,14 +108,12 @@ model Message {
 }
 
 model Cart {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(cuid())
+  userId    String   @unique
   listingId String
-  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-
   createdAt DateTime @default(now())
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, listingId])
 }
@@ -159,7 +140,6 @@ enum Status {
   SOLD
 }
 
-//add more if needed
 enum DealMethod {
   DECK
   COM1

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Category, Condition, DealMethod } from "@prisma/client";
 import Uploader from "../_components/uploader";
@@ -9,10 +10,17 @@ import ConditionSelector from "../_components/ConditionSelector";
 import DealMethodSelector from "../_components/DealMethodSelector";
 import ItemDetailsForm from "../_components/ItemDetailsForm";
 import PriceInput from "../_components/PriceInput";
-import { useRouter } from "next/navigation";
 
 export default function SellPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const listingId = searchParams.get("id");
+  const isEditMode = !!listingId;
+
+  const { data: listing } = api.listings.getSingleListing.useQuery(
+    { id: listingId ?? "" },
+    { enabled: isEditMode }
+  );
 
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("");
@@ -23,43 +31,60 @@ export default function SellPage() {
   const [condition, setCondition] = useState<Condition | null>(null);
   const [dealMethods, setDealMethods] = useState<DealMethod[]>([]);
 
-  const createListing = api.listings.createListing.useMutation({
-    onSuccess: () => {
-      alert("Listing created successfully!");
-      router.push("/my-listings");
-    },
-    onError: (err) => {
-      alert("Error: " + err.message);
-    },
-  });
+  const createListing = api.listings.createListing.useMutation();
+  const editListing = api.listings.editListing.useMutation();
+
+  useEffect(() => {
+    if (isEditMode && listing) {
+      setTitle(listing.title);
+      setBrand(listing.brand ?? "");
+      setDescription(listing.description);
+      setPrice(listing.price);
+      setImageUrls(listing.imageUrls);
+      setCategory(listing.category);
+      setCondition(listing.condition);
+      setDealMethods(listing.dealMethods);
+    }
+  }, [isEditMode, listing]);
 
   const handleSubmit = () => {
-    // for debugging 
-    console.log({
-      title,
-      description,
-      price,
-      imageUrls,
-      category,
-      condition,
-      dealMethods,
-    });
-
     if (!title || !description || !price || imageUrls.length === 0 || !category || !condition || dealMethods.length === 0) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    createListing.mutate({
+    const payload = {
       title,
       description,
       price,
-      imageUrls,  // Changed from imageUrl to imageUrls
+      imageUrls,
       brand,
       category,
       condition,
       dealMethods,
-    });
+    };
+
+    if (isEditMode) {
+      editListing.mutate(
+        { id: listingId!, ...payload },
+        {
+          onSuccess: () => {
+            alert("Listing updated successfully!");
+            router.push("/my-listings");
+            setTimeout(() => window.location.reload(), 150);
+          },
+          onError: (err) => alert("Error: " + err.message),
+        }
+      );
+    } else {
+      createListing.mutate(payload, {
+        onSuccess: () => {
+          alert("Listing created successfully!");
+          router.push("/my-listings");
+        },
+        onError: (err) => alert("Error: " + err.message),
+      });
+    }
   };
 
   return (
@@ -90,7 +115,7 @@ export default function SellPage() {
         onClick={handleSubmit}
         className="bg-green-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-600"
       >
-        List now
+        {isEditMode ? "Save Changes" : "List now"}
       </button>
     </div>
   );

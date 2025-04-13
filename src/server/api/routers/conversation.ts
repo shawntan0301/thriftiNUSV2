@@ -68,7 +68,7 @@ export const conversationRouter = createTRPCRouter({
                         select: {
                             id: true,
                             title: true,
-                            imageUrl: true,
+                            imageUrls: true,
                             price: true
                         }
                     }
@@ -166,7 +166,7 @@ export const conversationRouter = createTRPCRouter({
                         select: {
                             id: true,
                             title: true,
-                            imageUrl: true,
+                            imageUrls: true,
                             price: true
                         }
                     }

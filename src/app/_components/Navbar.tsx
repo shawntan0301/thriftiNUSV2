@@ -1,15 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import NavItems from "./NavItems";
 import { buttonVariants } from "./ui/button";
-import Cart from "./Cart";
-import { currentUser } from "@clerk/nextjs/server";
-// import MobileNav from './MobileNav'
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { useUser, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 
-const Navbar = async () => {
-  const user = await currentUser();
+const Navbar = () => {
+  const { user } = useUser();
 
   return (
     <div className="sticky inset-x-0 top-0 z-50 h-16 bg-white">
@@ -17,7 +16,6 @@ const Navbar = async () => {
         <MaxWidthWrapper>
           <div className="border-b border-gray-200">
             <div className="flex h-16 items-center">
-              {/* <MobileNav /> */}
               {/* logo */}
               <div className="ml-4 flex lg:ml-0">
                 <Link href="/">
@@ -39,7 +37,6 @@ const Navbar = async () => {
                 <SignedOut>
                   <SignInButton mode="modal">
                     <button
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
                       className={buttonVariants({
                         variant: "ghost",
                       })}
@@ -59,10 +56,8 @@ const Navbar = async () => {
                     </span>
                   </span>
                   <div className="ml-4 flow-root lg:ml-6">
-                    {/* <Cart /> */}
                     <Link
                       href="/sell"
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
                       className={buttonVariants({
                         variant: "secondary",
                       })}

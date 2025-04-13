@@ -32,7 +32,7 @@ const EditProfileCard: React.FC<EditProfileCardProps> = ({
           className="w-32 h-32 rounded-full object-cover border border-gray-300"
         />
         <div className="flex flex-col gap-2">
-          <Uploader onImageUploaded={(url) => setImage(url)} />
+          <Uploader onImageUploaded={(urls) => setImage(urls[0] ?? null)} />
           <button
             onClick={() => {
                 const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;

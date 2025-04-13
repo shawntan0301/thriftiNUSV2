@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import Uploader from "./uploader";
+import PfpUploader from "./PfpUploader";
 
 type EditProfileCardProps = {
   name: string;
@@ -32,17 +33,16 @@ const EditProfileCard: React.FC<EditProfileCardProps> = ({
           className="w-32 h-32 rounded-full object-cover border border-gray-300"
         />
         <div className="flex flex-col gap-2">
-          <Uploader onImageUploaded={(urls) => setImage(urls[0] ?? null)} />
+          <PfpUploader onImageUploaded={(url) => setImage(url)} />
           <button
             onClick={() => {
-                const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
-                setImage(fallbackAvatar);
+              const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+              setImage(fallbackAvatar);
             }}
             className="text-sm text-red-600 hover:underline"
-            >
+          >
             Remove Photo
-            </button>
-
+          </button>
         </div>
       </div>
 

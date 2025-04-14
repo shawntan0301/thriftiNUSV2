@@ -19,7 +19,7 @@ export default function PfpUploader({
             <UploadButton
                 endpoint="profilePicUploader"
                 appearance={{
-                    button: "px-4 py-2 bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600 transition",
+                    button: "px-4 py-2 bg-gray-400 text-white rounded-md font-semibold hover:bg-gray-300 transition",
                     container: "",
                 }}
                 content={{
@@ -28,7 +28,7 @@ export default function PfpUploader({
                 onClientUploadComplete={(res) => {
                     if (res && res.length > 0) {
                         // Get the URL from the first (and only) file
-                        const newUrl = res[0].url || (res[0] as any).imageUrl;
+                        const newUrl = res[0]?.url || (res[0] as any)?.imageUrl;
 
                         // Update state with the new URL (replace the old one)
                         setImageUrl(newUrl);

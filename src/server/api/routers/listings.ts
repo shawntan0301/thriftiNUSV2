@@ -5,7 +5,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
-import { Category, Condition, DealMethod } from "@prisma/client";
+import { Category, Condition, DealMethod, Status } from "@prisma/client";
 
 export const listingsRouter = createTRPCRouter({
   createListing: protectedProcedure
@@ -70,6 +70,40 @@ export const listingsRouter = createTRPCRouter({
         },
       });
     }),
+
+  updateStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.enum(["available", "reserved", "sold"]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Find the listing first
+      const listing = await ctx.db.listing.findUnique({ where: { id: input.id } });
+      
+      // Check if listing exists and belongs to the user
+      if (!listing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Listing not found",
+        });
+      }
+      
+      if (listing.userId !== ctx.session.userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authorized to update this listing",
+        });
+      }
+      
+      // Update and return the listing with new status
+      return await ctx.db.listing.update({
+        where: { id: input.id },
+        data: { status: input.status.toUpperCase() as Status },
+      });
+    }),
+  
 
   // Delete a listing
   deleteListing: protectedProcedure

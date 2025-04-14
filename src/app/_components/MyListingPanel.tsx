@@ -21,6 +21,33 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
     },
   });
 
+  const markReserved = api.listings.updateStatus.useMutation({
+    onSuccess: () => {
+      alert("Listing marked as reserved!");
+      ctx.listings.getAllListings.invalidate();
+      router.push("/listings");
+      setTimeout(() => window.location.reload(), 150);
+    },
+    onError: (error) => {
+      alert("Error marking as reserved: " + error.message);
+    },
+  });
+
+
+
+  const markSold = api.listings.updateStatus.useMutation({
+    onSuccess: () => {
+      alert("Listing marked as sold!");
+      ctx.listings.getAllListings.invalidate();
+      router.push("/listings");
+      setTimeout(() => window.location.reload(), 150);
+    },
+    onError: (error) => {
+      alert("Error marking as sold: " + error.message);
+    },
+  });
+
+
   return (
     <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-sm space-y-4">
       <h3 className="font-semibold text-lg text-gray-800">Your Listing</h3>
@@ -28,18 +55,26 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
       <div className="space-y-3">
         <button
           onClick={() => router.push(`/sell?id=${listingId}`)}
-          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-900"
+          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer"
         >
           <Pencil size={16} />
           Edit Listing
         </button>
 
-        <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-900">
+        <button 
+        onClick={() =>
+          markReserved.mutate({ id: listingId, status: "reserved" })
+          }
+          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer">
           <Tag size={16} />
           Mark as Reserved
         </button>
 
-        <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-900">
+        <button 
+        onClick={() =>
+          markSold.mutate({ id: listingId, status: "sold" })
+          }
+          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer">
           <CheckCircle size={16} />
           Mark as Sold
         </button>

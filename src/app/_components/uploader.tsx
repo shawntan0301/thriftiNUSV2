@@ -1,15 +1,21 @@
 "use client";
 
 import { UploadButton } from "~/utils/uploadthing";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function Uploader({
+  initialImageUrls = [],
   onImageUploaded
 }: {
+  initialImageUrls?: string[];
   onImageUploaded?: (imageUrls: string[]) => void
 }) {
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialImageUrls);
+
+  useEffect(() => {
+    setImageUrls(initialImageUrls);
+  }, [initialImageUrls]);
 
   return (
     <main className="flex flex-col items-center justify-between">

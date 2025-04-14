@@ -25,7 +25,7 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
     onSuccess: () => {
       alert("Listing marked as reserved!");
       ctx.listings.getAllListings.invalidate();
-      router.push("/listings");
+      router.push(`/listing/view?id=${listingId}`)
       setTimeout(() => window.location.reload(), 150);
     },
     onError: (error) => {
@@ -39,7 +39,7 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
     onSuccess: () => {
       alert("Listing marked as sold!");
       ctx.listings.getAllListings.invalidate();
-      router.push("/listings");
+      router.push(`/listing/view?id=${listingId}`)
       setTimeout(() => window.location.reload(), 150);
     },
     onError: (error) => {

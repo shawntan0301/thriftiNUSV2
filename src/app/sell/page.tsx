@@ -70,7 +70,7 @@ export default function SellPage() {
         {
           onSuccess: () => {
             alert("Listing updated successfully!");
-            router.push("/my-listings");
+            router.push(`/listing/view?id=${listingId}`)
             setTimeout(() => window.location.reload(), 150);
           },
           onError: (err) => alert("Error: " + err.message),
@@ -89,7 +89,7 @@ export default function SellPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <Uploader onImageUploaded={(urls) => setImageUrls(urls)} />
+      <Uploader initialImageUrls={imageUrls} onImageUploaded={(urls) => setImageUrls(urls)} />
       <CategorySelector value={category} onChange={setCategory} />
       <ConditionSelector value={condition} onChange={setCondition} />
       <ItemDetailsForm

@@ -22,8 +22,19 @@ const getStatusStyle = (status: string) => {
 };
 
 const ListingDetails = ({ listing }: Props) => {
+  const formattedDate = new Date(listing.createdAt).toLocaleString("en-SG", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Singapore",
+  });
+
   return (
     <div className="space-y-10">
+      {/* Poster and time */}
+      <div className="text-gray-600 text-sm">
+        Posted by <span className="font-medium text-[#1F3B76]">{listing.user.name}</span> on {formattedDate}
+      </div>
+
       {/* title, price */}
       <div className="space-y-2">
         <h1 className="text-4xl font-bold text-[#1F3B76]">{listing.title}</h1>
@@ -58,14 +69,16 @@ const ListingDetails = ({ listing }: Props) => {
         <hr className="mt-4" />
       </div>
 
-      {/* desc */}
+      {/* description */}
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold text-[#1F3B76]">Description</h2>
-        <p className="text-xl text-gray-900 whitespace-pre-line">{listing.description}</p>
+        <p className="text-xl text-gray-900 whitespace-pre-line">
+          {listing.description}
+        </p>
         <hr className="mt-4" />
       </div>
 
-      {/* dealmethod (ltr chage to multiple) */}
+      {/* deal methods */}
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold text-[#1F3B76]">Deal method</h2>
         <ul className="list-disc ml-5 text-xl text-gray-900 space-y-1">

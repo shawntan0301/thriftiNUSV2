@@ -7,6 +7,7 @@ import MyListingPanel from "../../_components/MyListingPanel";
 import OthersListingPanel from "../../_components/OthersListingPanel";
 import ListingDetails from "../../_components/ListingDetails";
 import ImageDisplay from "../../_components/ImageDisplay";
+import MeetTheSeller from "../../_components/MeetTheSeller";
 
 export default function ListingViewPage() {
   const router = useRouter();
@@ -35,15 +36,21 @@ export default function ListingViewPage() {
   }
 
   const isOwnListing = currentUser.id === listing.userId;
-  const imageArray = Array.isArray(listing.imageUrls) ? listing.imageUrls : [listing.imageUrls];
+  const imageArray = Array.isArray(listing.imageUrls)
+    ? listing.imageUrls
+    : [listing.imageUrls];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      {/* Top image */}
       <ImageDisplay images={imageArray} />
+
+      {/* Grid layout for details and panel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
         <div className="md:col-span-2">
           <ListingDetails listing={listing} />
         </div>
+
         <div className="md:col-span-1">
           {isOwnListing ? (
             <MyListingPanel listingId={listing.id} />
@@ -51,6 +58,11 @@ export default function ListingViewPage() {
             <OthersListingPanel seller={listing.user} />
           )}
         </div>
+      </div>
+
+      {/* Full-width seller section below the grid */}
+      <div className="mt-12">
+        <MeetTheSeller sellerId={listing.userId} />
       </div>
     </div>
   );

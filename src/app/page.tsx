@@ -1,35 +1,46 @@
 "use client";
 
-import MaxWidthWrapper from "./_components/MaxWidthWrapper";
-import { Button } from "./_components/ui/button";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { api } from "~/trpc/react";
+import MaxWidthWrapper from "./_components/MaxWidthWrapper";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import Intro from "./_components/IntroPage";
+import ListingGrid from "./_components/ListingGrid"; // 👈 make sure path is correct
 
 export default function Home() {
   const router = useRouter();
+  const { data: listings, isLoading } = api.listings.getAllListings.useQuery();
 
   return (
     <div>
-      {/* <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <SignedIn>
-          <button onClick={() => router.push("/my-listings")}>Check My Listings!</button>
-          <UserButton />
-        </SignedIn>
-        <SignedOut>
-          <SignInButton />
-        </SignedOut>
-      </main> */}
       <MaxWidthWrapper>
         <SignedIn>
           <Intro />
-          <button onClick={() => router.push("/my-listings")}>
-            Check My Listings!
-          </button>
+
+          <div className="flex justify-between items-center my-4">
+            <button
+              onClick={() => router.push("/my-listings")}
+              className="px-4 py-2 rounded-md"
+            >
+              Check My Listings!
+            </button>
+          </div>
+
+          {/* show all listings */}
+          {isLoading ? (
+            <p>Loading listings...</p>
+          ) : listings && listings.length > 0 ? (
+            <ListingGrid listings={listings} />
+          ) : (
+            <p>No listings available.</p>
+          )}
         </SignedIn>
+
         <SignedOut>
           <Intro />
+          <p className="text-center text-gray-600 mt-4">
+            Please sign in to explore the marketplace.
+          </p>
         </SignedOut>
       </MaxWidthWrapper>
     </div>

@@ -149,6 +149,7 @@ export const userRouter = createTRPCRouter({
           name: true,
           image: true,
           bio: true, // optional
+          createdAt: true,
         },
       });
 

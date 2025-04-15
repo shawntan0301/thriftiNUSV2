@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 type ReviewCardProps = {
   id: string;
@@ -35,7 +36,10 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
     <div className="w-full max-w-[280px]">
       <div className="text-sm text-gray-800 space-y-1">
         <div className="flex items-center gap-1 text-gray-700 text-sm">
+
+        <Link href={`/my-listings/view?id=${author.id}`}>
           <span className="font-semibold underline">{author.name}</span>
+          </Link>
           <span className="text-gray-400">|</span>
           <span>{formatDate(createdAt)}</span>
           <span className="text-gray-400">|</span>

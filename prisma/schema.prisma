@@ -52,6 +52,7 @@ model User {
   receivedReviews     Review[]       @relation("ReceivedReviews")
   sessions            Session[]
   savedListings       Listing[]      @relation("SavedListings")
+  filedReports        Report[]       @relation("FiledReports")
 }
 
 model Listing {
@@ -71,6 +72,7 @@ model Listing {
   conversations Conversation[]
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedBy       User[]         @relation("SavedListings")
+  reports       Report[]
 }
 
 model Review {
@@ -118,6 +120,24 @@ model Cart {
   @@unique([userId, listingId])
 }
 
+model Report {
+  id         String       @id @default(cuid())
+  reporterId String       // Person filing the report
+  reporteeId String       // person being reported
+  listingId  String
+  createdAt  DateTime     @default(now())
+  reportType ReportTopic[]
+  bodyText   String
+  reportStatus ReportStatus[]
+  
+  // Relations
+  reporter   User         @relation("FiledReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  // Prevent duplicate reports from same user on same listing
+  @@unique([reporterId, listingId])
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -126,6 +146,25 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+enum ReportStatus {
+  OPEN
+  CLOSED
+}
+
+enum ReportTopic {
+  PHISHING_SCAMMER  
+  SUSPICIOUS_ACCOUNT  
+  AN_ITEM_I_SOLD  
+  AN_ITEM_I_BOUGHT  
+  CANCELLING_ON_DEAL  
+  SELLING_PROHIBITED_ITEM  
+  MISPRICED_LISTINGS  
+  OFFENSIVE_BEHAVIOUR_OR_CONTENT  
+  DUPLICATE_POSTS  
+  IRRELEVANT_KEYWORDS  
+  ITEMS_WRONGLY_CATEGORIZED  
+  SELLING_COUNTERFEIT_ITEMS
+}
 enum Condition {
   BRAND_NEW
   LIKE_NEW

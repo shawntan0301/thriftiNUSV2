@@ -33,10 +33,51 @@ export const conversationRouter = createTRPCRouter({
             });
         }),
 
+    // get or start for OthersListingPanel
+    getOrCreateConversation: protectedProcedure
+        .input(
+            z.object({
+            receiverId: z.string(),
+            listingId: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const existing = await ctx.db.conversation.findFirst({
+            where: {
+                buyerId: ctx.session.userId,
+                sellerId: input.receiverId,
+                listingId: input.listingId,
+            },
+            });
+
+            if (existing) return existing;
+
+            const listing = await ctx.db.listing.findUnique({
+            where: { id: input.listingId },
+            });
+
+            if (!listing) {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Listing does not exist.",
+            });
+            }
+
+            return await ctx.db.conversation.create({
+            data: {
+                buyerId: ctx.session.userId,
+                sellerId: input.receiverId,
+                listingId: input.listingId,
+            },
+            });
+        }),
+
+      
+
     //getConversationsForUser
     getConversationsForUser: protectedProcedure
         .query(async ({ ctx }) => {
-            return await ctx.db.conversation.findMany({
+            const conversations = await ctx.db.conversation.findMany({
                 where: {
                     OR: [
                         { buyerId: ctx.session.userId },
@@ -69,15 +110,22 @@ export const conversationRouter = createTRPCRouter({
                             id: true,
                             title: true,
                             imageUrls: true,
-                            price: true
+                            price: true,
+                            status: true,
                         }
                     }
-                },
-                orderBy: {
-                    updatedAt: 'desc'
-                    
                 }
             });
+
+            // sort by latest messsage time
+            const sorted = conversations.sort((a, b) => {
+                const aTime = a.messages[0]?.createdAt ?? a.updatedAt;
+                const bTime = b.messages[0]?.createdAt ?? b.updatedAt;
+                return bTime.getTime() - aTime.getTime(); // descending
+              });
+            
+              return sorted;
+            
         }),
 
     //sendMessage
@@ -167,7 +215,8 @@ export const conversationRouter = createTRPCRouter({
                             id: true,
                             title: true,
                             imageUrls: true,
-                            price: true
+                            price: true,
+                            status: true,
                         }
                     }
                 }

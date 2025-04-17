@@ -11,7 +11,9 @@ export default function EditProfilePage() {
   const updateUser = api.user.updateUserProfile.useMutation({
     onSuccess: () => {
         alert("Profile updated successfully!");
-        router.push("/my-listings");
+        if (user) {
+          router.push(`/my-listings/view?id=${user.id}`);
+        }
         setTimeout(() => {
           window.location.reload();
         }, 150); // auto refresh my-listings

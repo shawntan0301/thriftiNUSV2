@@ -8,6 +8,10 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+body {
+  background-color: #f9fcff; /* super light blue, i added for contrast and readability */
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

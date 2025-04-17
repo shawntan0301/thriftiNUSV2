@@ -3,13 +3,14 @@
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import MaxWidthWrapper from "./_components/MaxWidthWrapper";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import Intro from "./_components/IntroPage";
-import ListingGrid from "./_components/ListingGrid"; // 👈 make sure path is correct
+import ListingGrid from "./_components/ListingGrid";
 
 export default function Home() {
   const router = useRouter();
   const { data: listings, isLoading } = api.listings.getAllListings.useQuery();
+  const { data: currentUser } = api.user.getCurrentUser.useQuery();
 
   return (
     <div>
@@ -19,14 +20,17 @@ export default function Home() {
 
           <div className="flex justify-between items-center my-4">
             <button
-              onClick={() => router.push("/my-listings")}
+              onClick={() => {
+                if (currentUser?.id) {
+                  router.push(`/my-listings/view?id=${currentUser.id}`);
+                }
+              }}
               className="px-4 py-2 rounded-md"
             >
               Check My Listings!
             </button>
           </div>
 
-          {/* show all listings */}
           {isLoading ? (
             <p>Loading listings...</p>
           ) : listings && listings.length > 0 ? (

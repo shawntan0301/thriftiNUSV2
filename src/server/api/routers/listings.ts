@@ -197,22 +197,41 @@ export const listingsRouter = createTRPCRouter({
   }),
 
   // Search listings by keyword (can consider adding search everytime a letter is written)
-  searchListings: publicProcedure
-    .input(z.object({ query: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
-      const results = await ctx.db.listing.findMany({
-        where: {
-          OR: [
-            { title: { contains: input.query, mode: "insensitive" } },
-            { description: { contains: input.query, mode: "insensitive" } },
-          ],
-        },
-        orderBy: { createdAt: "desc" },
-        include: { user: true },
-      });
+  filterSearchSortListings: publicProcedure
+  .input(
+    z.object({
+      query: z.string().optional(),
+      category: z.nativeEnum(Category).optional(),
+      condition: z.nativeEnum(Condition).optional(),
+      priceSort: z.enum(["asc", "desc"]).optional(),
+    })
+  )
+  .query(async ({ ctx, input }) => {
+    const { query, category, condition, priceSort } = input;
 
-      return results;
-    }),
+    return await ctx.db.listing.findMany({
+      where: {
+        AND: [
+          query
+            ? {
+                OR: [
+                  { title: { contains: query, mode: "insensitive" } },
+                  { description: { contains: query, mode: "insensitive" } },
+                  { brand: { contains: query, mode: "insensitive" } },
+                ],
+              }
+            : {},
+          category ? { category } : {},
+          condition ? { condition } : {},
+        ],
+      },
+      orderBy: priceSort
+        ? { price: priceSort }
+        : { createdAt: "desc" }, // default sort
+      include: { user: true },
+    });
+  }),
+
 
   // Filter listings by category
   filterListingsByCategory: publicProcedure

@@ -6,11 +6,16 @@ import MaxWidthWrapper from "./_components/MaxWidthWrapper";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import Intro from "./_components/IntroPage";
 import ListingGrid from "./_components/ListingGrid";
+import SearchAndFilters from "./_components/SearchAndFilters";
+import { useState } from "react";
 
 export default function Home() {
   const router = useRouter();
-  const { data: listings, isLoading } = api.listings.getAllListings.useQuery();
   const { data: currentUser } = api.user.getCurrentUser.useQuery();
+  const { data: allListings, isLoading } = api.listings.getAllListings.useQuery();
+  const [listings, setListings] = useState<any[] | null>(null);
+
+  const listingsToShow = listings ?? allListings;
 
   return (
     <div>
@@ -31,12 +36,16 @@ export default function Home() {
             </button>
           </div>
 
+          {/* 🔍 Search + Filter Component */}
+          <SearchAndFilters onUpdateResults={setListings} />
+
+          {/* 🛒 Listings */}
           {isLoading ? (
             <p>Loading listings...</p>
-          ) : listings && listings.length > 0 ? (
-            <ListingGrid listings={listings} />
+          ) : listingsToShow && listingsToShow.length > 0 ? (
+            <ListingGrid listings={listingsToShow} />
           ) : (
-            <p>No listings available.</p>
+            <p className="text-gray-600">No results found.</p>
           )}
         </SignedIn>
 

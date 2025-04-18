@@ -1,43 +1,65 @@
 "use client";
 
 import { DealMethod } from "@prisma/client";
-import { useState, useEffect } from "react";
 
 type Props = {
-  value: DealMethod | null;
-  onChange: (value: DealMethod) => void;
+  selected: DealMethod[];
+  onChange: (methods: DealMethod[]) => void;
 };
 
-const DealMethodSelector: React.FC<Props> = ({ value, onChange }) => {
-  const [selected, setSelected] = useState<DealMethod | "">("");
+const DealMethodSelector: React.FC<Props> = ({ selected, onChange }) => {
+  const allMethods = Object.values(DealMethod);
 
-  useEffect(() => {
-    setSelected(value ?? "");
-  }, [value]);
+  const handleAdd = (method: DealMethod) => {
+    if (!selected.includes(method)) {
+      onChange([...selected, method]);
+    }
+  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = e.target.value as DealMethod;
-    setSelected(selectedValue);
-    onChange(selectedValue);
+  const handleRemove = (method: DealMethod) => {
+    onChange(selected.filter((m) => m !== method));
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded shadow">
-      <label className="font-semibold text-lg text-gray-900 mb-1 block">Deal Method</label>
-      <select
-        value={selected}
-        onChange={handleChange}
-        className="mt-1 w-full border border-gray-300 p-2 rounded-lg text-lg bg-white"
-      >
-        <option value="" disabled>
-          Select a deal method
-        </option>
-        {Object.values(DealMethod).map((method) => (
-          <option key={method} value={method}>
-            {method.charAt(0) + method.slice(1).toLowerCase()}
-          </option>
+    <div className="p-4 rounded-xl shadow bg-gray-50">
+      <label className="font-semibold text-lg text-[#1F3B76] block mb-2">
+        Deal methods
+      </label>
+
+      {/* Selected tags */}
+      <div className="flex gap-2 flex-wrap mb-4">
+        {selected.map((method) => (
+          <div
+            key={method}
+            className="flex items-center bg-orange-500 text-white font-semibold px-4 py-2 rounded-xl space-x-2"
+          >
+            <span>{method}</span>
+            <button
+              onClick={() => handleRemove(method)}
+              className="text-gray-300 hover:text-white"
+              type="button"
+            >
+              ×
+            </button>
+          </div>
         ))}
-      </select>
+      </div>
+
+      {/* Add method buttons */}
+      <div className="flex gap-2 flex-wrap">
+        {allMethods
+          .filter((m) => !selected.includes(m))
+          .map((method) => (
+            <button
+              key={method}
+              onClick={() => handleAdd(method)}
+              className="bg-white text-gray-800 border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-100 transition"
+              type="button"
+            >
+              {method}
+            </button>
+          ))}
+      </div>
     </div>
   );
 };

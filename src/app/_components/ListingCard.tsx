@@ -116,7 +116,16 @@ const ListingCard: React.FC<ListingCardProps> = ({
       {/* Info */}
       <div className="mt-2 space-y-0.5">
         <h3 className="text-sm font-medium truncate">{title}</h3>
-        <p className="text-sm font-semibold text-gray-800">S${price}</p>
+        <p className="text-sm font-semibold text-gray-800">
+          S$
+          {Number.isInteger(price)
+            ? price
+            : parseFloat(price.toFixed(2)).toFixed(
+                price * 100 % 100 === 0 ? 0 :
+                price * 10 % 10 === 0 ? 2 : 2
+              )}
+        </p>
+
         <p className="text-xs text-gray-500">{formatCondition(condition)}</p>
       </div>
     </div>

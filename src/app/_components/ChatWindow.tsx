@@ -82,7 +82,16 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
             <span className="text-sm font-semibold text-black">
               {listing.title}
             </span>
-            <span className="text-sm text-gray-600">S${listing.price}</span>
+            <span className="text-sm text-gray-600">
+            S$
+            {Number.isInteger(listing.price)
+                ? listing.price
+                : parseFloat(listing.price.toFixed(2)).toFixed(
+                    listing.price * 100 % 100 === 0 ? 0 :
+                    listing.price * 10 % 10 === 0 ? 2 : 2
+                )}
+            </span>
+
           </div>
           <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden">
             <img

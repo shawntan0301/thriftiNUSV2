@@ -38,7 +38,17 @@ const ListingDetails = ({ listing }: Props) => {
       {/* title, price */}
       <div className="space-y-2">
         <h1 className="text-4xl font-bold text-[#1F3B76]">{listing.title}</h1>
-        <p className="text-xl text-gray-700">S${listing.price}</p>
+        <p className="text-xl text-gray-700">
+  S$
+  {Number.isInteger(listing.price)
+    ? listing.price
+    : parseFloat(listing.price.toFixed(2)).toFixed(
+        listing.price * 100 % 100 === 0 ? 0 :
+        listing.price * 10 % 10 === 0 ? 2 : 2
+      )}
+</p>
+
+
 
         {listing.status !== "AVAILABLE" && (
           <span className={getStatusStyle(listing.status)}>

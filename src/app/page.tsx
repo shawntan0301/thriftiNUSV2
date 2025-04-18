@@ -23,23 +23,10 @@ export default function Home() {
         <SignedIn>
           <Intro />
 
-          <div className="flex justify-between items-center my-4">
-            <button
-              onClick={() => {
-                if (currentUser?.id) {
-                  router.push(`/my-listings/view?id=${currentUser.id}`);
-                }
-              }}
-              className="px-4 py-2 rounded-md"
-            >
-              Check My Listings!
-            </button>
-          </div>
-
-          {/* 🔍 Search + Filter Component */}
+          {/* search, filters */}
           <SearchAndFilters onUpdateResults={setListings} />
 
-          {/* 🛒 Listings */}
+          {/* listings */}
           {isLoading ? (
             <p>Loading listings...</p>
           ) : listingsToShow && listingsToShow.length > 0 ? (

@@ -168,6 +168,15 @@ export const listingsRouter = createTRPCRouter({
           OR: [
             { title: { contains: input.query, mode: "insensitive" } },
             { description: { contains: input.query, mode: "insensitive" } },
+            { brand: { contains: input.query, mode: "insensitive" } },
+            {
+              category: {
+                in: Object.values(Category).filter((cat) =>
+                  cat.toLowerCase().includes(input.query.toLowerCase())
+                ),
+              },
+            },
+            
           ],
         },
         orderBy: { createdAt: "desc" },

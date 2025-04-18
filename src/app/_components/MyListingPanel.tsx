@@ -11,7 +11,7 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
   const deleteListing = api.listings.deleteListing.useMutation({
     onSuccess: () => {
       ctx.listings.getAllListings.invalidate();
-      router.push("/my-listings");
+      router.push("/");
       setTimeout(() => {
         window.location.reload();
       }, 150); // auto refresh 

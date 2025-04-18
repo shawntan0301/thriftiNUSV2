@@ -103,14 +103,8 @@ export default function SellPage() {
       />
       <PriceInput value={price} onChange={setPrice} />
       <DealMethodSelector
-        value={null}
-        onChange={(method) => {
-          setDealMethods((prev) =>
-            prev.includes(method)
-              ? prev.filter((m) => m !== method)
-              : [...prev, method]
-          );
-        }}
+        selected={dealMethods}
+        onChange={setDealMethods}
       />
       <button
         onClick={handleSubmit}

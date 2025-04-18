@@ -170,10 +170,18 @@ enum Status {
 
 enum DealMethod {
   DECK
-  COM1
+  COM
   FASS
   TERRACE
   BIZ
+  UTOWN
+  CDE 
+  USC 
+  VENTUS
+  CLB
+  PGP
+  IT 
+  SCIENCE
 }
 
 enum Category {
@@ -181,4 +189,5 @@ enum Category {
   FASHION
   BOOKS
   STATIONERY
+  OTHERS
 }

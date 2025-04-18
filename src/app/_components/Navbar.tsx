@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
-import NavItems from "./NavItems";
 import { buttonVariants } from "./ui/button";
 import {
   SignedIn,
@@ -29,14 +28,10 @@ const Navbar = () => {
                   <Image
                     src="/ThriftiNUS.svg"
                     alt="ThriftiNUS"
-                    height={12}
-                    width={80}
+                    height={24}
+                    width={160}
                   />
                 </Link>
-              </div>
-
-              <div className="z-50 hidden lg:ml-8 lg:block lg:self-stretch">
-                <NavItems />
               </div>
 
               <div className="ml-auto flex items-center space-x-4">

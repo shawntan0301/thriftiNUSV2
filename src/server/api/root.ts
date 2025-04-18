@@ -3,7 +3,7 @@ import { listingsRouter } from "./routers/listings";
 import { userRouter } from "./routers/user";
 import { conversationRouter } from "./routers/conversation";
 import { reviewRouter } from "./routers/review";
-import { cartRouter } from "./routers/cart";
+
 import { reportsRouter } from "~/server/api/routers/reports";
 
 /**
@@ -16,7 +16,6 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   conversation: conversationRouter,
   review: reviewRouter,
-  cart: cartRouter,
   report: reportsRouter,
 });
 

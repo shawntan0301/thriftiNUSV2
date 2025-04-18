@@ -5,6 +5,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { Category, Condition, DealMethod, Status } from "@prisma/client";
 
 export const listingsRouter = createTRPCRouter({
@@ -25,7 +26,7 @@ export const listingsRouter = createTRPCRouter({
       return await ctx.db.listing.create({
         data: {
           ...input,
-          userId: ctx.session.userId,
+          userId: ctx.session.userId
         },
       });
     }),
@@ -81,7 +82,7 @@ export const listingsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Find the listing first
       const listing = await ctx.db.listing.findUnique({ where: { id: input.id } });
-      
+
       // Check if listing exists and belongs to the user
       if (!listing) {
         throw new TRPCError({
@@ -89,26 +90,62 @@ export const listingsRouter = createTRPCRouter({
           message: "Listing not found",
         });
       }
-      
+
       if (listing.userId !== ctx.session.userId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Not authorized to update this listing",
         });
       }
-      
+
       // Update and return the listing with new status
       return await ctx.db.listing.update({
         where: { id: input.id },
         data: { status: input.status.toUpperCase() as Status },
       });
     }),
-  
+
 
   // Delete a listing
   deleteListing: protectedProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
+      const listing = await ctx.db.listing.findUnique({ where: { id: input } });
+
+      if (!listing)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Listing not found",
+        });
+      if (listing.userId !== ctx.session.userId)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Listing not found",
+        });
+
+      return await ctx.db.listing.delete({ where: { id: input } });
+    }),
+
+  // Deletes any listing (action can only be performed by admin)
+  deleteAnyListing: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const userRole = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.session.userId,
+        },
+        select: {
+          isAdmin: true
+        }
+      })
+
+      if (!userRole?.isAdmin) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not admin"
+        })
+      }
+
       const listing = await ctx.db.listing.findUnique({ where: { id: input } });
 
       if (!listing)

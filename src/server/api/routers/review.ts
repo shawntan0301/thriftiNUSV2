@@ -108,11 +108,4 @@ export const reviewRouter = createTRPCRouter({
         },
       });
     }),
-
-  // resolveReview: protectedProcedure
-  //   .input(
-  //     z.object({
-
-  //     })
-  //   )
 });

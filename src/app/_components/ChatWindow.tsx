@@ -139,13 +139,22 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
       {/* type */}
       <div className="border-t p-3 flex items-center bg-white">
         <div className="flex-1 bg-gray-100 text-sm text-black px-4 py-2 rounded-full">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type here..."
-            className="w-full bg-transparent focus:outline-none placeholder-gray-500"
-          />
+        <input
+        type="text"
+        value={newMessage}
+        onChange={(e) => setNewMessage(e.target.value)}
+        onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // prevent newline
+            if (newMessage.trim()) {
+                sendMessageMutation.mutate({ conversationId, content: newMessage });
+            }
+            }
+        }}
+        placeholder="Type here..."
+        className="w-full bg-transparent focus:outline-none placeholder-gray-500"
+        />
+
         </div>
         <button
           onClick={() => {

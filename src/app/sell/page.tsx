@@ -84,7 +84,7 @@ export default function SellPage() {
           setTimeout(() => window.location.reload(), 150);
         },
         onError: (err) => alert("Error: " + err.message),
-      });      
+      });
     }
   };
 

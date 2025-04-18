@@ -27,7 +27,7 @@ export default function OthersListingPanel({ seller }: OthersListingPanelProps) 
       receiverId: seller.id,
       listingId: listingId,
     });
-  };  
+  };
 
   const handleMakeOffer = () => {
     alert(`You offered S$ ${offer}`);
@@ -60,6 +60,9 @@ export default function OthersListingPanel({ seller }: OthersListingPanelProps) 
           Make Offer
         </button>
       </div>
+      <button onClick={() => router.push(`/create-report/?id=${listingId}`)} className="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600">
+        Report Listing
+      </button>
     </div>
   );
 }

@@ -64,7 +64,7 @@ export default function OthersListingPanel({
         </button>
       </div>
       <button
-        onClick={() => router.push(`/create-report/?ilistingIdd=${listingId}`)}
+        onClick={() => router.push(`/create-report/?listingId=${listingId}`)}
         className="rounded bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600"
       >
         Report Listing

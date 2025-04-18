@@ -266,4 +266,55 @@ export const reportsRouter = createTRPCRouter({
     getReportTopics: publicProcedure.query(() => {
         return Object.values(ReportTopic);
     }),
+
+    // Get report by ID
+    getReportById: protectedProcedure
+        .input(z.string())
+        .query(async ({ ctx, input }) => {
+            const userRole = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.userId
+                },
+                select: {
+                    isAdmin: true,
+                }
+            });
+
+            if (!userRole?.isAdmin) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "User is not admin"
+                });
+            }
+
+            const report = await ctx.db.report.findUnique({
+                where: { id: input },
+                include: {
+                    reporter: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        },
+                    },
+                    listing: {
+                        select: {
+                            id: true,
+                            title: true,
+                            imageUrls: true,
+                        },
+                    },
+                },
+            });
+
+            if (!report) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Report not found"
+                });
+            }
+
+            return report;
+        }),
 });

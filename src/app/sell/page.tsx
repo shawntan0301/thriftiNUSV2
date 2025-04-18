@@ -78,12 +78,13 @@ export default function SellPage() {
       );
     } else {
       createListing.mutate(payload, {
-        onSuccess: () => {
+        onSuccess: (data) => {
           alert("Listing created successfully!");
-          router.push("/my-listings");
+          router.push(`/listing/view?id=${data.id}`);
+          setTimeout(() => window.location.reload(), 150);
         },
         onError: (err) => alert("Error: " + err.message),
-      });
+      });      
     }
   };
 

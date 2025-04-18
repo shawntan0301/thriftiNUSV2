@@ -230,6 +230,15 @@ export const reportsRouter = createTRPCRouter({
                 where: { id: input },
             });
 
+            const userRole = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.userId,
+                },
+                select: {
+                    isAdmin: true,
+                }
+            })
+
             if (!report) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
@@ -237,9 +246,8 @@ export const reportsRouter = createTRPCRouter({
                 });
             }
 
-            // In a real app, you might want to check if the user is an admin here
-            // For now, we'll allow only the report creator to close it
-            if (report.reporterId !== ctx.session.userId) {
+            // Checks whether user is report creator or if user is admin
+            if (report.reporterId !== ctx.session.userId || !userRole?.isAdmin) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
                     message: "You don't have permission to close this report",

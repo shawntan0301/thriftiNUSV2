@@ -35,15 +35,15 @@ model Session {
 }
 
 model User {
-  id                  String         @id @default(cuid())
+  id                  String         @id // from clerk
   name                String
   email               String         @unique
   bio                 String?
   emailVerified       DateTime?
   image               String?
   createdAt           DateTime       @default(now())
+  isAdmin             Boolean        @default(false)
   accounts            Account[]
-  cart                Cart?
   buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
   listing             Listing[]
@@ -68,7 +68,6 @@ model Listing {
   status        Status         @default(AVAILABLE)
   category      Category
   imageUrls     String[]
-  cart          Cart[]
   conversations Conversation[]
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedBy       User[]         @relation("SavedListings")
@@ -109,31 +108,20 @@ model Message {
   sender         User         @relation(fields: [senderId], references: [id])
 }
 
-model Cart {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  listingId String
-  createdAt DateTime @default(now())
-  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, listingId])
-}
-
 model Report {
-  id         String       @id @default(cuid())
-  reporterId String       // Person filing the report
-  reporteeId String       // person being reported
-  listingId  String
-  createdAt  DateTime     @default(now())
-  reportType ReportTopic[]
-  bodyText   String
+  id           String         @id @default(cuid())
+  reporterId   String // Person filing the report
+  reporteeId   String // person being reported
+  listingId    String
+  createdAt    DateTime       @default(now())
+  reportType   ReportTopic[]
+  bodyText     String
   reportStatus ReportStatus[]
-  
+
   // Relations
-  reporter   User         @relation("FiledReports", fields: [reporterId], references: [id], onDelete: Cascade)
-  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
+  reporter User    @relation("FiledReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  listing  Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
   // Prevent duplicate reports from same user on same listing
   @@unique([reporterId, listingId])
 }
@@ -152,19 +140,20 @@ enum ReportStatus {
 }
 
 enum ReportTopic {
-  PHISHING_SCAMMER  
-  SUSPICIOUS_ACCOUNT  
-  AN_ITEM_I_SOLD  
-  AN_ITEM_I_BOUGHT  
-  CANCELLING_ON_DEAL  
-  SELLING_PROHIBITED_ITEM  
-  MISPRICED_LISTINGS  
-  OFFENSIVE_BEHAVIOUR_OR_CONTENT  
-  DUPLICATE_POSTS  
-  IRRELEVANT_KEYWORDS  
-  ITEMS_WRONGLY_CATEGORIZED  
+  PHISHING_SCAMMER
+  SUSPICIOUS_ACCOUNT
+  AN_ITEM_I_SOLD
+  AN_ITEM_I_BOUGHT
+  CANCELLING_ON_DEAL
+  SELLING_PROHIBITED_ITEM
+  MISPRICED_LISTINGS
+  OFFENSIVE_BEHAVIOUR_OR_CONTENT
+  DUPLICATE_POSTS
+  IRRELEVANT_KEYWORDS
+  ITEMS_WRONGLY_CATEGORIZED
   SELLING_COUNTERFEIT_ITEMS
 }
+
 enum Condition {
   BRAND_NEW
   LIKE_NEW

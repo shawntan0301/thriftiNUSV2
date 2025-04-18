@@ -143,6 +143,18 @@ export const reportsRouter = createTRPCRouter({
 
     // 2. Get all reports (admin only, but implemented as protected for now)
     getAllReports: protectedProcedure.query(async ({ ctx }) => {
+        const userId = ctx.session.userId;
+
+        const userRole = ctx.db.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                isAdmin: true,
+            }
+        })
+
+        // if (userRole?.isAdmin) {
         return await ctx.db.report.findMany({
             orderBy: { createdAt: "desc" },
             include: {
@@ -163,6 +175,7 @@ export const reportsRouter = createTRPCRouter({
                 },
             },
         });
+        // },
     }),
 
     // 3. Get created reports by user ID (reports made by a user)

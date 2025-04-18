@@ -17,6 +17,12 @@ export default function OthersListingPanel({
   const params = useSearchParams();
   const listingId = params.get("id");
 
+  // Query to check if a report already exists
+  const { data: reportExists, isLoading: checkingReport } = api.report.checkListingReportExists.useQuery(
+    { listingId: listingId ?? "" },
+    { enabled: !!listingId }
+  );
+
   const getOrCreateMutation =
     api.conversation.getOrCreateConversation.useMutation({
       onSuccess: (conversation) => {
@@ -63,12 +69,22 @@ export default function OthersListingPanel({
           Make Offer
         </button>
       </div>
-      <button
-        onClick={() => router.push(`/create-report/?listingId=${listingId}`)}
-        className="rounded bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600"
-      >
-        Report Listing
-      </button>
+
+      {reportExists ? (
+        <button
+          disabled
+          className="rounded bg-gray-400 px-4 py-2 font-semibold text-white"
+        >
+          Report already created, pending review
+        </button>
+      ) : (
+        <button
+          onClick={() => router.push(`/create-report/?listingId=${listingId}`)}
+          className="rounded bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600"
+        >
+          Report Listing
+        </button>
+      )}
     </div>
   );
 }

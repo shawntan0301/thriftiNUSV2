@@ -3,11 +3,13 @@
 import { ReportTopic } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import toast, { Toaster } from 'react-hot-toast';
 import { api } from "~/trpc/react";
 
 export default function CreateFunction() {
   const router = useRouter();
   const params = useSearchParams();
+  const utils = api.useUtils();
 
   // if reporting a listing, add params behind listingId=...
   const listingId = params?.get("listingId");
@@ -45,14 +47,26 @@ export default function CreateFunction() {
         { reporteeId: targetUserId, ...payload },
         {
           onSuccess: () => {
-            router.push("/router/view");
+            toast.success('Report submitted successfully');
+            // Invalidate the query cache so it refetches when we return to the listing page
+            utils.report.checkListingReportExists.invalidate();
+            // Add delay before navigation
+            setTimeout(() => {
+              router.back();
+            }, 1500); // 1.5 second delay
           },
         },
       );
     } else {
       createListingReportMutation.mutate(payload, {
         onSuccess: () => {
-          router.push("/router/view");
+          toast.success('Report submitted successfully');
+          // Invalidate the query cache so it refetches when we return to the listing page
+          utils.report.checkListingReportExists.invalidate({ listingId: listingId ?? "" });
+          // Add delay before navigation
+          setTimeout(() => {
+            router.back();
+          }, 1500); // 1.5 second delay
         },
       });
     }
@@ -60,6 +74,7 @@ export default function CreateFunction() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+      <Toaster position="top-center" />
       <h2 className="text-2xl font-bold text-blue-900">Report details</h2>
       <div>
         <label className="mb-1 block text-lg font-semibold text-gray-900">
@@ -80,11 +95,10 @@ export default function CreateFunction() {
                 key={topic}
                 type="button"
                 onClick={() => handleTopicToggle(topic)}
-                className={`rounded-full px-4 py-1 shadow-sm transition ${
-                  selected
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
+                className={`rounded-full px-4 py-1 shadow-sm transition ${selected
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-200 text-gray-700"
+                  }`}
               >
                 {pretty}
               </button>

@@ -41,12 +41,22 @@ const ImageModal: React.FC<ImageModalProps> = ({
 
     if (!isOpen) return null;
 
+    const handleBackgroundClick = (e: React.MouseEvent) => {
+        // Only close if clicking the overlay background directly
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center"
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+            onClick={handleBackgroundClick} // Close when clicking outside
         >
-            <div className="relative w-[70%] max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+            <div
+                className="relative w-[70%] max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden"
+            >
                 {/* Close button */}
                 <button
                     onClick={onClose}

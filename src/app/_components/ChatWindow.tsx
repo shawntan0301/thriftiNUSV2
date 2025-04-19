@@ -70,8 +70,10 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
         listingId={listing.id}
         currentUserId={currentUserId}
         sellerId={conversation.seller.id}
+        conversationBuyerId={conversation.buyer.id}
         refetchConversation={refetch}
-      />
+        />
+
 
       {/* chat messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">

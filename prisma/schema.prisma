@@ -53,6 +53,8 @@ model User {
   sessions            Session[]
   savedListings       Listing[]      @relation("SavedListings")
   filedReports        Report[]       @relation("FiledReports")
+  filedProfileReports ProfileReport[]       @relation("FiledProfileReports")
+  offersAsBuyer       Offer[]        @relation(fields: [], references: [])
 }
 
 model Listing {
@@ -72,6 +74,7 @@ model Listing {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedBy       User[]         @relation("SavedListings")
   reports       Report[]
+  offers        Offer[]        @relation("ListingOffers")
 }
 
 model Review {
@@ -126,6 +129,42 @@ model Report {
   @@unique([reporterId, listingId])
 }
 
+model ProfileReport {
+  id           String         @id @default(cuid())
+  reporterId   String // Person filing the report
+  reporteeId   String // person being reported
+  createdAt    DateTime       @default(now())
+  reportType   ReportTopic[]
+  bodyText     String
+  reportStatus ReportStatus[]
+
+  // Relations
+  reporter User    @relation("FiledProfileReports", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate reports from same user on same listing
+  @@unique([reporterId, reporteeId])
+}
+
+model Offer {
+  id         String      @id @default(cuid())
+  listingId  String
+  buyerId    String
+  amount     Float
+  message    String?     
+  status     OfferStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  listing    Listing     @relation("ListingOffers", fields: [listingId], references: [id], onDelete: Cascade)
+  buyer      User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -153,6 +192,8 @@ enum ReportTopic {
   ITEMS_WRONGLY_CATEGORIZED
   SELLING_COUNTERFEIT_ITEMS
 }
+
+
 
 enum Condition {
   BRAND_NEW

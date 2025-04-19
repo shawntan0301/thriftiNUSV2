@@ -42,16 +42,17 @@ function OtherUserProfilePageContent() {
   const averageRating =
     reviews.length > 0
       ? parseFloat(
-          (
-            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-          ).toFixed(1)
-        )
+        (
+          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        ).toFixed(1)
+      )
       : 0;
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-6">
       {/* User Info */}
       <UserProfileCard
+        userId={user.id}
         name={user.name}
         image={user.image}
         bio={user.bio}
@@ -66,21 +67,19 @@ function OtherUserProfilePageContent() {
       <div className="flex gap-6 border-b">
         <button
           onClick={() => setActiveTab("listings")}
-          className={`pb-2 font-semibold ${
-            activeTab === "listings"
+          className={`pb-2 font-semibold ${activeTab === "listings"
               ? "text-blue-900 border-b-2 border-blue-900"
               : "text-gray-500"
-          }`}
+            }`}
         >
           Listings
         </button>
         <button
           onClick={() => setActiveTab("reviews")}
-          className={`pb-2 font-semibold ${
-            activeTab === "reviews"
+          className={`pb-2 font-semibold ${activeTab === "reviews"
               ? "text-blue-900 border-b-2 border-blue-900"
               : "text-gray-500"
-          }`}
+            }`}
         >
           Reviews
         </button>

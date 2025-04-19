@@ -22,10 +22,16 @@ export default function ConversationList({ onSelectConversation, selectedId }: P
   if (isError || !conversations || !currentUser)
     return <div className="p-4 text-red-500">Failed to load conversations.</div>;
 
+  // if 0 message, dont display
+  // conversation is created as long as user clicks "Chat with Seller", but should not display on the list
+  const conversationsWithMessages = conversations.filter(
+    (c) => c.messages && c.messages.length > 0
+  );
+
   return (
     <div className="overflow-y-auto h-full px-1">
       <AnimatePresence>
-        {conversations.map((conversation) => (
+        {conversationsWithMessages.map((conversation) => (
           <motion.div
             key={conversation.id}
             layout

@@ -204,10 +204,12 @@ export const listingsRouter = createTRPCRouter({
       category: z.nativeEnum(Category).optional(),
       condition: z.nativeEnum(Condition).optional(),
       priceSort: z.enum(["asc", "desc"]).optional(),
+      minPrice: z.number().optional(),
+      maxPrice: z.number().optional(),
     })
   )
   .query(async ({ ctx, input }) => {
-    const { query, category, condition, priceSort } = input;
+    const { query, category, condition, priceSort, minPrice, maxPrice } = input;
 
     return await ctx.db.listing.findMany({
       where: {
@@ -223,6 +225,8 @@ export const listingsRouter = createTRPCRouter({
             : {},
           category ? { category } : {},
           condition ? { condition } : {},
+          minPrice !== undefined ? { price: { gte: minPrice } } : {},
+          maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
         ],
       },
       orderBy: priceSort
@@ -231,6 +235,7 @@ export const listingsRouter = createTRPCRouter({
       include: { user: true },
     });
   }),
+
 
 
   // Filter listings by category

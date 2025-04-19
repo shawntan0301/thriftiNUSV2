@@ -80,8 +80,9 @@ export default function SellPage() {
       createListing.mutate(payload, {
         onSuccess: (data) => {
           alert("Listing created successfully!");
-          router.push(`/listing/view?id=${data.id}`);
-          setTimeout(() => window.location.reload(), 150);
+          setTimeout(() => {
+            router.push(`/listing/view?id=${data.id}`);
+          }, 100);
         },
         onError: (err) => alert("Error: " + err.message),
       });

@@ -317,4 +317,23 @@ export const reportsRouter = createTRPCRouter({
 
             return report;
         }),
+
+    // Check if a listing report already exists
+    checkListingReportExists: publicProcedure
+        .input(z.object({
+            listingId: z.string(),
+        }))
+        .query(async ({ ctx, input }) => {
+            const userId = ctx.session?.userId;
+            if (!userId) return false;
+
+            const existingReport = await ctx.db.report.findFirst({
+                where: {
+                    reporterId: userId,
+                    listingId: input.listingId,
+                }
+            });
+
+            return !!existingReport;
+        }),
 });

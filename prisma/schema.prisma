@@ -53,6 +53,7 @@ model User {
   sessions            Session[]
   savedListings       Listing[]      @relation("SavedListings")
   filedReports        Report[]       @relation("FiledReports")
+  offersAsBuyer       Offer[]        @relation(fields: [], references: [])
 }
 
 model Listing {
@@ -72,6 +73,7 @@ model Listing {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedBy       User[]         @relation("SavedListings")
   reports       Report[]
+  offers        Offer[]        @relation("ListingOffers")
 }
 
 model Review {
@@ -124,6 +126,26 @@ model Report {
 
   // Prevent duplicate reports from same user on same listing
   @@unique([reporterId, listingId])
+}
+
+model Offer {
+  id         String      @id @default(cuid())
+  listingId  String
+  buyerId    String
+  amount     Float
+  message    String?     
+  status     OfferStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  listing    Listing     @relation("ListingOffers", fields: [listingId], references: [id], onDelete: Cascade)
+  buyer      User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 model VerificationToken {

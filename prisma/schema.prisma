@@ -53,6 +53,7 @@ model User {
   sessions            Session[]
   savedListings       Listing[]      @relation("SavedListings")
   filedReports        Report[]       @relation("FiledReports")
+  filedProfileReports ProfileReport[]       @relation("FiledProfileReports")
   offersAsBuyer       Offer[]        @relation(fields: [], references: [])
 }
 
@@ -128,6 +129,22 @@ model Report {
   @@unique([reporterId, listingId])
 }
 
+model ProfileReport {
+  id           String         @id @default(cuid())
+  reporterId   String // Person filing the report
+  reporteeId   String // person being reported
+  createdAt    DateTime       @default(now())
+  reportType   ReportTopic[]
+  bodyText     String
+  reportStatus ReportStatus[]
+
+  // Relations
+  reporter User    @relation("FiledProfileReports", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate reports from same user on same listing
+  @@unique([reporterId, reporteeId])
+}
+
 model Offer {
   id         String      @id @default(cuid())
   listingId  String
@@ -175,6 +192,8 @@ enum ReportTopic {
   ITEMS_WRONGLY_CATEGORIZED
   SELLING_COUNTERFEIT_ITEMS
 }
+
+
 
 enum Condition {
   BRAND_NEW

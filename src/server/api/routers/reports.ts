@@ -296,6 +296,17 @@ export const reportsRouter = createTRPCRouter({
                             name: true,
                             email: true,
                             image: true,
+                            _count: {
+                                select: {
+                                    listing: true,
+                                    receivedReviews: true,
+                                }
+                            },
+                            receivedReviews: {
+                                select: {
+                                    rating: true,
+                                }
+                            }
                         },
                     },
                     listing: {
@@ -315,7 +326,20 @@ export const reportsRouter = createTRPCRouter({
                 });
             }
 
-            return report;
+            // Calculate average rating
+            const averageRating = report.reporter.receivedReviews.length > 0
+                ? report.reporter.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / report.reporter.receivedReviews.length
+                : null;
+
+            return {
+                ...report,
+                reporter: {
+                    ...report.reporter,
+                    rating: averageRating,
+                    listingsCount: report.reporter._count.listing,
+                    reviewsCount: report.reporter._count.receivedReviews,
+                }
+            };
         }),
 
     // Check if a listing report already exists

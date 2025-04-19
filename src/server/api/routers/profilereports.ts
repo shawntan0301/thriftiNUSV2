@@ -62,9 +62,92 @@ export const profileReportsRouter = createTRPCRouter({
             });
         }),
 
+    // Get a specific profile report by ID
+    getProfileReportById: protectedProcedure
+        .input(z.string())
+        .query(async ({ ctx, input }) => {
+            const report = await ctx.db.profileReport.findUnique({
+                where: { id: input },
+                include: {
+                    reporter: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true,
+                            email: true,
+                            _count: {
+                                select: {
+                                    listing: true,
+                                    receivedReviews: true,
+                                }
+                            },
+                            receivedReviews: {
+                                select: {
+                                    rating: true,
+                                }
+                            }
+                        },
+                    },
+                },
+            });
+
+            if (!report) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Report not found",
+                });
+            }
+
+            // Get reportee details with additional information
+            const reportee = await ctx.db.user.findUnique({
+                where: { id: report.reporteeId },
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                    email: true,
+                    _count: {
+                        select: {
+                            listing: true,
+                            receivedReviews: true,
+                        }
+                    },
+                    receivedReviews: {
+                        select: {
+                            rating: true,
+                        }
+                    }
+                },
+            });
+
+            // Calculate average ratings
+            const reporterRating = report.reporter.receivedReviews.length > 0
+                ? report.reporter.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / report.reporter.receivedReviews.length
+                : null;
+
+            const reporteeRating = reportee?.receivedReviews.length ? 
+                reportee.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / reportee.receivedReviews.length
+                : null;
+
+            return {
+                ...report,
+                reporter: {
+                    ...report.reporter,
+                    rating: reporterRating,
+                    listingsCount: report.reporter._count.listing,
+                    reviewsCount: report.reporter._count.receivedReviews,
+                },
+                reportee: reportee ? {
+                    ...reportee,
+                    rating: reporteeRating,
+                    listingsCount: reportee._count.listing,
+                    reviewsCount: reportee._count.receivedReviews,
+                } : null
+            };
+        }),
 
     getAllProfileReports: protectedProcedure.query(async ({ ctx }) => {
-        return await ctx.db.profileReport.findMany({
+        const reports = await ctx.db.profileReport.findMany({
             include: {
                 reporter: {
                     select: {
@@ -78,6 +161,28 @@ export const profileReportsRouter = createTRPCRouter({
                 createdAt: "desc",
             },
         });
+
+        // Get reportee details for each report
+        const reportsWithReportees = await Promise.all(
+            reports.map(async (report) => {
+                const reportee = await ctx.db.user.findUnique({
+                    where: { id: report.reporteeId },
+                    select: {
+                        id: true,
+                        name: true,
+                        image: true,
+                        email: true,
+                    },
+                });
+
+                return {
+                    ...report,
+                    reportee,
+                };
+            })
+        );
+
+        return reportsWithReportees;
     }),
 
     // Get reports created by the current user

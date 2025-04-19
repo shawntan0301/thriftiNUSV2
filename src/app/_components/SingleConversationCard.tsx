@@ -5,6 +5,7 @@ import { Status } from "@prisma/client";
 
 type Props = {
   conversation: {
+    offers: any;
     id: string;
     updatedAt: string | Date;
     listing: {
@@ -21,6 +22,7 @@ type Props = {
   };
   currentUserId: string;
   onClick: () => void;
+  selected?: boolean;
 };
 
 const formatDate = (date: Date | string) => {
@@ -35,6 +37,7 @@ export default function SingleConversationCard({
   conversation,
   currentUserId,
   onClick,
+  selected = false,
 }: Props) {
   const otherUser =
     conversation.buyer.id === currentUserId
@@ -42,7 +45,8 @@ export default function SingleConversationCard({
       : conversation.buyer;
 
   const latestMessage = conversation.messages[0];
-  const snippet = latestMessage?.content || "No messages yet";
+  const snippet =
+    latestMessage?.content || (conversation.offers?.length ? "Offer" : "No messages yet");
   const truncatedSnippet =
     snippet.length > 40 ? snippet.slice(0, 40).trim() + "..." : snippet;
 
@@ -53,16 +57,16 @@ export default function SingleConversationCard({
   return (
     <div
       onClick={onClick}
-      className="cursor-pointer border-b last:border-none hover:bg-gray-50 transition px-4 py-4 flex items-center gap-3"
+      className={`cursor-pointer border-b last:border-none transition px-4 py-4 flex items-center gap-3 ${
+        selected ? "bg-gray-100" : "hover:bg-gray-50"
+      }`}
     >
-      {/* pfp and name */}
       <img
         src={otherUser.image || "/default-profile.jpg"}
         alt={otherUser.name}
         className="w-13 h-13 rounded-full object-cover flex-shrink-0"
       />
 
-      {/* title, latest msg */}
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold text-gray-800 truncate">
           {otherUser.name}
@@ -71,13 +75,17 @@ export default function SingleConversationCard({
         <div className="text-xs text-gray-600 truncate">{truncatedSnippet}</div>
       </div>
 
-      {/* date, time of latest msg, image */}
       <div className="flex flex-col items-end w-[110px] flex-shrink-0">
-        
-            <div className="text-xs text-gray-500 mb-1 whitespace-nowrap">{formattedDate}</div>
+        <div className="text-xs text-gray-500 mb-1 whitespace-nowrap">
+          {formattedDate}
+        </div>
 
-            <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden">
-              <img src={listingImage} alt={title} className="object-cover w-full h-full" />
+        <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden">
+          <img
+            src={listingImage}
+            alt={title}
+            className="object-cover w-full h-full"
+          />
 
           {status !== "AVAILABLE" && (
             <div

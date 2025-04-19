@@ -74,59 +74,63 @@ export const conversationRouter = createTRPCRouter({
 
       
 
-    //getConversationsForUser
-    getConversationsForUser: protectedProcedure
-        .query(async ({ ctx }) => {
-            const conversations = await ctx.db.conversation.findMany({
-                where: {
-                    OR: [
-                        { buyerId: ctx.session.userId },
-                        { sellerId: ctx.session.userId }
-                    ]
+    // getConversationsForUser
+    getConversationsForUser: protectedProcedure.query(async ({ ctx }) => {
+        const conversations = await ctx.db.conversation.findMany({
+        where: {
+            OR: [
+            { buyerId: ctx.session.userId },
+            { sellerId: ctx.session.userId },
+            ],
+        },
+        include: {
+            buyer: {
+            select: {
+                id: true,
+                name: true,
+                image: true,
+            },
+            },
+            seller: {
+            select: {
+                id: true,
+                name: true,
+                image: true,
+            },
+            },
+            messages: {
+            orderBy: {
+                createdAt: "desc",
+            },
+            take: 1, // preview 1 message
+            },
+            listing: {
+                select: {
+                  id: true,
+                  title: true,
+                  imageUrls: true,
+                  price: true,
+                  status: true,
+                  offers: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1, // just get latest offer
+                  },
                 },
-                include: {
-                    buyer: {
-                        select: {
-                            id: true,
-                            name: true,
-                            image: true
-                        }
-                    },
-                    seller: {
-                        select: {
-                            id: true,
-                            name: true,
-                            image: true
-                        }
-                    },
-                    messages: {
-                        orderBy: {
-                            createdAt: 'desc'
-                        },
-                        take: 1 // i think the use case for this function is "view all chats"? so only need 1 msg to preview the chat
-                    },
-                    listing: {
-                        select: {
-                            id: true,
-                            title: true,
-                            imageUrls: true,
-                            price: true,
-                            status: true,
-                        }
-                    }
-                }
-            });
-
-            // sort by latest messsage time
-            const sorted = conversations.sort((a, b) => {
-                const aTime = a.messages[0]?.createdAt ?? a.updatedAt;
-                const bTime = b.messages[0]?.createdAt ?? b.updatedAt;
-                return bTime.getTime() - aTime.getTime(); // descending
-              });
-            
-              return sorted;
-            
-        }),
+              },
+              
+        },
+        });
+    
+        // Sort by latest activity (either message or updatedAt)
+        const sorted = conversations.sort((a, b) => {
+        const aTime = a.messages[0]?.createdAt ?? a.updatedAt;
+        const bTime = b.messages[0]?.createdAt ?? b.updatedAt;
+        return bTime.getTime() - aTime.getTime(); // descending
+        });
+    
+        return sorted;
+    }),
+  
 
     //sendMessage
     sendMessage: protectedProcedure

@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import ChatMessage from "./ChatMessage";
-import Link from "next/link";
+import ChatHeader from "./ChatHeader";
+import OfferHeader from "./OfferHeader";
 
-// format date to SGT
 const formatDate = (date: Date | string) => {
   return new Date(date).toLocaleString("en-SG", {
     dateStyle: "medium",
@@ -20,7 +20,13 @@ type ChatWindowProps = {
 export default function ChatWindow({ conversationId }: ChatWindowProps) {
   const { data: currentUser } = api.user.getCurrentUser.useQuery();
   const { data: conversation, isLoading, error, refetch } =
-    api.conversation.getFullConversation.useQuery({ conversationId });
+  api.conversation.getFullConversation.useQuery(
+    { conversationId },
+    {
+      enabled: !!conversationId,
+      refetchInterval: 1000, // refetch every 3 seconds, dont need to refresh to see messages
+    }
+  );
 
   const [newMessage, setNewMessage] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -44,8 +50,8 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
   if (error || !conversation) return <div>Error loading chat</div>;
 
   const currentUserId = currentUser.id;
+  const isSeller = conversation.seller.id === currentUserId;
 
-  // the other user 
   const otherUser =
     conversation.buyer.id === currentUserId
       ? conversation.seller
@@ -56,63 +62,18 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* sticky header */}
-      <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between">
-        {/* left: other user info */}
-        <Link
-          href={`/my-listings/view?id=${otherUser.id}`}
-          className="flex items-center gap-3"
-        >
-          <img
-            src={otherUser.image || "/default-profile.jpg"}
-            alt={otherUser.name}
-            className="w-11 h-11 rounded-full object-cover"
-          />
-          <span className="text-sm font-semibold text-black">
-            {otherUser.name}
-          </span>
-        </Link>
+      {/* TOP sticky HEADER user + listing info */}
+      <ChatHeader otherUser={otherUser} listing={listing} />
 
-        {/* right: listing info */}
-        <Link
-          href={`/listing/view?id=${listing.id}`}
-          className="flex items-center gap-3"
-        >
-          <div className="flex flex-col text-right">
-            <span className="text-sm font-semibold text-black">
-              {listing.title}
-            </span>
-            <span className="text-sm text-gray-600">
-            S$
-            {Number.isInteger(listing.price)
-                ? listing.price
-                : parseFloat(listing.price.toFixed(2)).toFixed(
-                    listing.price * 100 % 100 === 0 ? 0 :
-                    listing.price * 10 % 10 === 0 ? 2 : 2
-                )}
-            </span>
+      {/* SECOND sticky header for offer (if exists) */}
+      <OfferHeader
+        listingId={listing.id}
+        currentUserId={currentUserId}
+        sellerId={conversation.seller.id}
+        refetchConversation={refetch}
+      />
 
-          </div>
-          <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden">
-            <img
-              src={listing.imageUrls[0]}
-              alt={listing.title}
-              className="object-cover w-full h-full"
-            />
-            {listing.status !== "AVAILABLE" && (
-              <div
-                className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
-                  listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
-                }`}
-              >
-                {listing.status}
-              </div>
-            )}
-          </div>
-        </Link>
-      </div>
-
-      {/* chatMessage */}
+      {/* chat messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
         {conversation.messages.map((msg) => {
           const msgDate = formatDate(msg.createdAt);
@@ -128,7 +89,7 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
               )}
               <ChatMessage
                 message={msg}
-                currentUserId={currentUserId} // 👈 Ensures correct message alignment
+                currentUserId={currentUserId}
               />
             </div>
           );
@@ -136,30 +97,35 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
         <div ref={bottomRef} />
       </div>
 
-      {/* type */}
+      {/* chat input box */}
       <div className="border-t p-3 flex items-center bg-white">
         <div className="flex-1 bg-gray-100 text-sm text-black px-4 py-2 rounded-full">
-        <input
-        type="text"
-        value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
-        onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault(); // prevent newline
-            if (newMessage.trim()) {
-                sendMessageMutation.mutate({ conversationId, content: newMessage });
-            }
-            }
-        }}
-        placeholder="Type here..."
-        className="w-full bg-transparent focus:outline-none placeholder-gray-500"
-        />
-
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (newMessage.trim()) {
+                  sendMessageMutation.mutate({
+                    conversationId,
+                    content: newMessage,
+                  });
+                }
+              }
+            }}
+            placeholder="Type here..."
+            className="w-full bg-transparent focus:outline-none placeholder-gray-500"
+          />
         </div>
         <button
           onClick={() => {
             if (newMessage.trim()) {
-              sendMessageMutation.mutate({ conversationId, content: newMessage });
+              sendMessageMutation.mutate({
+                conversationId,
+                content: newMessage,
+              });
             }
           }}
           className="ml-2 text-gray-500 hover:text-blue-500"

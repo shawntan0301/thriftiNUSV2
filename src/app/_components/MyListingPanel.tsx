@@ -1,10 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Pencil, Tag, CheckCircle, Trash2 } from "lucide-react";
+import { Pencil, Tag, CheckCircle, Trash2, Undo2 } from "lucide-react";
 import { api } from "~/trpc/react";
+import type { Status } from "@prisma/client";
 
-const MyListingPanel = ({ listingId }: { listingId: string }) => {
+type MyListingPanelProps = {
+  listingId: string;
+  status: Status;
+};
+
+const MyListingPanel = ({ listingId, status }: MyListingPanelProps) => {
   const router = useRouter();
   const ctx = api.useContext();
 
@@ -12,47 +18,31 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
     onSuccess: () => {
       ctx.listings.getAllListings.invalidate();
       router.push("/");
-      setTimeout(() => {
-        window.location.reload();
-      }, 150); // auto refresh 
+      setTimeout(() => window.location.reload(), 150);
     },
     onError: (error) => {
       alert(error.message);
     },
   });
 
-  const markReserved = api.listings.updateStatus.useMutation({
-    onSuccess: () => {
-      alert("Listing marked as reserved!");
+  const updateStatus = api.listings.updateStatus.useMutation({
+    onSuccess: (data) => {
+      alert(`Listing marked as ${data.status.toLowerCase()}!`);
       ctx.listings.getAllListings.invalidate();
-      router.push(`/listing/view?id=${listingId}`)
+      router.push(`/listing/view?id=${listingId}`);
       setTimeout(() => window.location.reload(), 150);
     },
     onError: (error) => {
-      alert("Error marking as reserved: " + error.message);
+      alert("Error updating status: " + error.message);
     },
   });
-
-
-
-  const markSold = api.listings.updateStatus.useMutation({
-    onSuccess: () => {
-      alert("Listing marked as sold!");
-      ctx.listings.getAllListings.invalidate();
-      router.push(`/listing/view?id=${listingId}`)
-      setTimeout(() => window.location.reload(), 150);
-    },
-    onError: (error) => {
-      alert("Error marking as sold: " + error.message);
-    },
-  });
-
 
   return (
     <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-sm space-y-4">
       <h3 className="font-semibold text-lg text-gray-800">Your Listing</h3>
 
       <div className="space-y-3">
+        {/* edit button */}
         <button
           onClick={() => router.push(`/sell?id=${listingId}`)}
           className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer"
@@ -61,24 +51,30 @@ const MyListingPanel = ({ listingId }: { listingId: string }) => {
           Edit Listing
         </button>
 
-        <button 
-        onClick={() =>
-          markReserved.mutate({ id: listingId, status: "reserved" })
-          }
-          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer">
-          <Tag size={16} />
-          Mark as Reserved
-        </button>
+        {/* conditionally render based on status */}
+        {status === "AVAILABLE" && (
+          <button
+            onClick={() => updateStatus.mutate({ id: listingId, status: "reserved" })}
+            className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer"
+          >
+            <Tag size={16} />
+            Mark as Reserved
+          </button>
+        )}
 
-        <button 
-        onClick={() =>
-          markSold.mutate({ id: listingId, status: "sold" })
-          }
-          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer">
-          <CheckCircle size={16} />
-          Mark as Sold
-        </button>
+        {status === "RESERVED" && (
+          <button
+            onClick={() => updateStatus.mutate({ id: listingId, status: "available" })}
+            className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-700 cursor-pointer"
+          >
+            <Undo2 size={16} />
+            Mark as Available
+          </button>
+        )}
 
+        {/* for sold listings, no options to manually change its status should be shown */}
+
+        {/* delete button */}
         <button
           onClick={() => {
             if (confirm("Are you sure you want to delete this listing?")) {

@@ -200,6 +200,23 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
           <option value="asc">Price: Low to High</option>
           <option value="desc">Price: High to Low</option>
         </select>
+
+        <button
+          onClick={() => {
+            setQuery("");
+            setCategory(undefined);
+            setCondition(undefined);
+            setPriceSort(undefined);
+            setMinPrice("");
+            setMaxPrice("");
+            setTriggerSearch(true);
+            refetch();
+          }}
+          className="flex items-center gap-1 text-base text-gray-700 hover:underline transition"
+        >
+          <span>Clear All Filters</span>
+          <span className="text-lg font-bold">×</span>
+        </button>
       </div>
     </>
   );

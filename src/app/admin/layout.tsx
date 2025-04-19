@@ -142,7 +142,7 @@ export default async function AdminLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto pt-16 md:ml-64 md:pt-0">
-        <div className="h-[64px] border-b md:flex md:items-center md:justify-between md:px-6 md:py-4">
+        {/* <div className="h-[64px] border-b md:flex md:items-center md:justify-between md:px-6 md:py-4">
           <div className="hidden items-center gap-2 md:flex">
             <div className="flex items-center gap-1 text-sm font-medium">
               <Link href="/admin" className="text-muted-foreground hover:text-foreground">
@@ -158,7 +158,7 @@ export default async function AdminLayout({
               <span className="sr-only">Notifications</span>
             </Button>
           </div>
-        </div>
+        </div> */}
         <div className="p-4 md:p-6">
           {children}
         </div>

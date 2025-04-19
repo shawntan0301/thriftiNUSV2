@@ -80,7 +80,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
                 refetch();
               }
             }}
-            className="w-full pl-10 pr-4 py-2 rounded-full bg-white text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white text-base font-semibold border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
@@ -88,7 +88,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
             setTriggerSearch(true);
             refetch();
           }}
-          className="px-5 py-2 rounded-full bg-[#1F3B76] text-white font-semibold hover:bg-[#162b57] transition"
+          className="px-6 py-2.5 rounded-lg bg-[#1F3B76] text-white text-base font-semibold border-2 border-[#1F3B76] hover:bg-[#162b57] transition"
         >
           Search
         </button>
@@ -100,7 +100,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
         <select
           value={category ?? ""}
           onChange={(e) => setCategory(e.target.value ? (e.target.value as Category) : undefined)}
-          className={`cursor-pointer hover:bg-gray-100 appearance-none px-4 py-2 rounded-full text-sm border ${
+          className={`cursor-pointer hover:bg-gray-100 appearance-none px-5 py-2.5 rounded-full text-base font-semibold border-2 ${
             category ? "bg-blue-100 text-blue-900 border-blue-300" : "bg-white text-gray-700 border-gray-300"
           }`}
         >
@@ -116,7 +116,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
         <select
           value={condition ?? ""}
           onChange={(e) => setCondition(e.target.value ? (e.target.value as Condition) : undefined)}
-          className={`cursor-pointer hover:bg-gray-100 appearance-none px-4 py-2 rounded-full text-sm border ${
+          className={`cursor-pointer hover:bg-gray-100 appearance-none px-5 py-2.5 rounded-full text-base font-semibold border-2 ${
             condition ? "bg-blue-100 text-blue-900 border-blue-300" : "bg-white text-gray-700 border-gray-300"
           }`}
         >
@@ -132,7 +132,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
         <div className="relative" ref={priceRef}>
           <button
             onClick={() => setShowPriceFilter(!showPriceFilter)}
-            className={`cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-full text-sm border ${
+            className={`cursor-pointer hover:bg-gray-100 px-5 py-2.5 rounded-full text-base font-semibold border-2 ${
               isPriceFiltered ? "bg-blue-100 text-blue-900 border-blue-300" : "bg-white text-gray-700 border-gray-300"
             }`}
           >
@@ -140,7 +140,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
           </button>
 
           {showPriceFilter && (
-            <div className="absolute z-10 mt-2 w-[320px] bg-white shadow-lg rounded-xl p-4 border border-gray-200">
+            <div className="absolute z-10 mt-2 w-[320px] bg-white shadow-lg rounded-xl p-4 border-2 border-gray-200">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
@@ -148,7 +148,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
                   placeholder="S$ Minimum"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-base px-4 py-2.5 rounded-lg border-2 border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
                 />
                 <span className="text-gray-500 font-semibold">-</span>
                 <input
@@ -157,7 +157,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
                   placeholder="S$ Maximum"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-base px-4 py-2.5 rounded-lg border-2 border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
                 />
               </div>
               <div className="mt-4 flex justify-end gap-2">
@@ -169,7 +169,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
                     setTriggerSearch(true);
                     refetch();
                   }}
-                  className="text-sm px-4 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+                  className="text-base px-5 py-2 rounded-md border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100"
                 >
                   Clear
                 </button>
@@ -179,7 +179,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
                     setTriggerSearch(true);
                     refetch();
                   }}
-                  className="text-sm px-4 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700 font-medium"
+                  className="text-base px-5 py-2 rounded-md bg-green-600 text-white font-semibold border-2 border-green-600 hover:bg-green-700"
                 >
                   Apply
                 </button>
@@ -192,7 +192,7 @@ export default function SearchAndFilters({ onUpdateResults }: Props) {
         <select
           value={priceSort ?? ""}
           onChange={(e) => setPriceSort(e.target.value ? (e.target.value as "asc" | "desc") : undefined)}
-          className={`cursor-pointer hover:bg-gray-100 appearance-none px-4 py-2 rounded-full text-sm border ${
+          className={`cursor-pointer hover:bg-gray-100 appearance-none px-5 py-2.5 rounded-full text-base font-semibold border-2 ${
             priceSort ? "bg-blue-100 text-blue-900 border-blue-300" : "bg-white text-gray-700 border-gray-300"
           }`}
         >

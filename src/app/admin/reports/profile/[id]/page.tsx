@@ -23,6 +23,7 @@ export default function ProfileReportDetailPage() {
     onSuccess: () => {
       toast.success('Report closed successfully');
       utils.profileReport.getProfileReportById.invalidate(params.id as string);
+      utils.profileReport.getAllProfileReports.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);

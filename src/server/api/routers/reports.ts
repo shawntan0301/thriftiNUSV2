@@ -247,7 +247,7 @@ export const reportsRouter = createTRPCRouter({
             }
 
             // Checks whether user is report creator or if user is admin
-            if (report.reporterId !== ctx.session.userId || !userRole?.isAdmin) {
+            if (report.reporterId !== ctx.session.userId && !userRole?.isAdmin) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
                     message: "You don't have permission to close this report",

@@ -23,6 +23,7 @@ export default function ListingReportDetailPage() {
     onSuccess: () => {
       toast.success('Report closed successfully');
       utils.report.getReportById.invalidate(params.id as string);
+      utils.report.getAllReports.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);

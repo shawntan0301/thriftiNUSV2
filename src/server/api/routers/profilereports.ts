@@ -225,11 +225,27 @@ export const profileReportsRouter = createTRPCRouter({
             const report = await ctx.db.profileReport.findUnique({
                 where: { id: input },
             });
+            const userRole = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.userId,
+                },
+                select: {
+                    isAdmin: true,
+                }
+            });
 
             if (!report) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "Report not found",
+                });
+            }
+
+            // Check if user is report creator or admin
+            if (report.reporterId !== ctx.session.userId && !userRole?.isAdmin) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You don't have permission to close this report",
                 });
             }
 

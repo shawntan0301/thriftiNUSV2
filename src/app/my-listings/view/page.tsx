@@ -8,6 +8,7 @@ import { api } from "~/trpc/react";
 import UserProfileCard from "@/app/_components/UserProfileCard";
 import ListingGrid from "@/app/_components/ListingGrid";
 import ReviewsGrid from "@/app/_components/ReviewsGrid";
+import { motion, AnimatePresence } from "framer-motion";
 
 function OtherUserProfilePageContent() {
   const searchParams = useSearchParams();
@@ -49,7 +50,12 @@ function OtherUserProfilePageContent() {
       : 0;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-6">
+    <motion.div
+      className="max-w-6xl mx-auto p-4 space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* User Info */}
       <UserProfileCard
         userId={user.id}
@@ -64,33 +70,52 @@ function OtherUserProfilePageContent() {
       />
 
       {/* Tab Navigation */}
-      <div className="flex gap-6 border-b">
-        <button
-          onClick={() => setActiveTab("listings")}
-          className={`pb-2 font-semibold ${activeTab === "listings"
-              ? "text-blue-900 border-b-2 border-blue-900"
-              : "text-gray-500"
+      <div className="flex gap-6 border-b relative">
+        {["listings", "reviews"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab as "listings" | "reviews")}
+            className={`pb-2 font-semibold transition-colors ${
+              activeTab === tab ? "text-blue-900" : "text-gray-500"
             }`}
-        >
-          Listings
-        </button>
-        <button
-          onClick={() => setActiveTab("reviews")}
-          className={`pb-2 font-semibold ${activeTab === "reviews"
-              ? "text-blue-900 border-b-2 border-blue-900"
-              : "text-gray-500"
-            }`}
-        >
-          Reviews
-        </button>
+          >
+            {(tab[0] ?? "").toUpperCase() + tab.slice(1)}
+            {activeTab === tab && (
+              <motion.div
+                layoutId="underline"
+                className="h-0.5 bg-blue-900 mt-2 rounded"
+              />
+            )}
+          </button>
+        ))}
       </div>
 
-      {/* Tab Content */}
-      {activeTab === "listings" && <ListingGrid listings={listings} />}
-      {activeTab === "reviews" && (
-        <ReviewsGrid reviews={reviews} averageRating={averageRating} />
-      )}
-    </div>
+      {/* Tab Content with animation */}
+      <AnimatePresence mode="wait">
+        {activeTab === "listings" && (
+          <motion.div
+            key="listings"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ListingGrid listings={listings} />
+          </motion.div>
+        )}
+        {activeTab === "reviews" && (
+          <motion.div
+            key="reviews"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ReviewsGrid reviews={reviews} averageRating={averageRating} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 

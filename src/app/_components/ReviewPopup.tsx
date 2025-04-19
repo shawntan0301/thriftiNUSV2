@@ -57,7 +57,7 @@ export default function ReviewPopup({ targetUserId, onClose }: ReviewPopupProps)
                 <button
                   key={star}
                   onClick={() => setRating(star)}
-                  className="text-3xl text-yellow-400 hover:scale-110 transition-transform"
+                  className="text-3xl text-yellow-400 hover:scale-110 transition-transform cursor-pointer"
                 >
                   {star <= rating ? "★" : <span className="text-gray-300">★</span>}
                 </button>
@@ -68,14 +68,14 @@ export default function ReviewPopup({ targetUserId, onClose }: ReviewPopupProps)
             <textarea
               rows={4}
               placeholder="Write your review here..."
-              className="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
 
             <button
               onClick={handleSubmit}
-              className="mt-4 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition"
+              className="mt-4 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition cursor-pointer"
             >
               Submit Review
             </button>

@@ -53,9 +53,9 @@ export default function ListingViewPage() {
 
         <div className="md:col-span-1">
           {isOwnListing ? (
-            <MyListingPanel listingId={listing.id} />
+            <MyListingPanel listingId={listing.id} status={listing.status} />
           ) : (
-            <OthersListingPanel seller={listing.user} />
+            <OthersListingPanel seller={listing.user} status={listing.status} />
           )}
         </div>
       </div>

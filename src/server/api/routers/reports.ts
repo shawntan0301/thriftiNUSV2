@@ -53,16 +53,17 @@ export const reportsRouter = createTRPCRouter({
                 }
 
                 // Check if user already reported this listing
-                const existingReport = await ctx.db.report.findUnique({
+                const existingReport = await ctx.db.report.findFirst({
                     where: {
-                        reporterId_listingId: {
-                            reporterId: ctx.session.userId,
-                            listingId: input.listingId,
-                        },
+                        reporterId: ctx.session.userId,
+                        listingId: input.listingId,
                     },
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
                 });
 
-                if (existingReport) {
+                if (existingReport && existingReport.reportStatus.includes(ReportStatus.OPEN)) {
                     throw new TRPCError({
                         code: "CONFLICT",
                         message: "You have already reported this listing",
@@ -113,16 +114,18 @@ export const reportsRouter = createTRPCRouter({
             }
 
             // Check if user already reported this listing
-            const existingReport = await ctx.db.report.findUnique({
+            const existingReport = await ctx.db.report.findFirst({
                 where: {
-                    reporterId_listingId: {
-                        reporterId: ctx.session.userId,
-                        listingId: input.listingId,
-                    },
+                    reporterId: ctx.session.userId,
+                    listingId: input.listingId,
                 },
+                orderBy: {
+                    createdAt: 'desc'
+                }
             });
 
-            if (existingReport) {
+            // Update this check to account for report status
+            if (existingReport && existingReport.reportStatus.includes(ReportStatus.OPEN)) {
                 throw new TRPCError({
                     code: "CONFLICT",
                     message: "You have already reported this listing",
@@ -280,9 +283,14 @@ export const reportsRouter = createTRPCRouter({
                 where: {
                     reporterId: userId,
                     listingId: input.listingId,
+                },
+                orderBy: {
+                    createdAt: 'desc'
                 }
             });
 
-            return !!existingReport;
+            if (!existingReport) return false;
+
+            return existingReport.reportStatus.includes(ReportStatus.OPEN);
         }),
 });

@@ -35,16 +35,18 @@ export const profileReportsRouter = createTRPCRouter({
             }
 
             // Check if user already reported this profile
-            const existingReport = await ctx.db.profileReport.findUnique({
+            const existingReport = await ctx.db.profileReport.findFirst({
                 where: {
-                    reporterId_reporteeId: {
-                        reporterId: ctx.session.userId,
-                        reporteeId: input.reporteeId,
-                    },
+                    reporterId: ctx.session.userId,
+                    reporteeId: input.reporteeId,
                 },
+                orderBy: {
+                    createdAt: 'desc'
+                }
             });
 
-            if (existingReport) {
+
+            if (existingReport && existingReport.reportStatus.includes(ReportStatus.OPEN)) {
                 throw new TRPCError({
                     code: "CONFLICT",
                     message: "You have already reported this user",
@@ -136,21 +138,25 @@ export const profileReportsRouter = createTRPCRouter({
             });
         }),
 
-    // Check if current user has reported a specific profile
+    // Check if current user has an OPEN report on a specific profile
     checkProfileReportExists: protectedProcedure
         .input(z.object({
             reporteeId: z.string(),
         }))
         .query(async ({ ctx, input }) => {
-            const report = await ctx.db.profileReport.findUnique({
+            // Find the most recent report between these users
+            const report = await ctx.db.profileReport.findFirst({
                 where: {
-                    reporterId_reporteeId: {
-                        reporterId: ctx.session.userId,
-                        reporteeId: input.reporteeId,
-                    },
+                    reporterId: ctx.session.userId,
+                    reporteeId: input.reporteeId,
                 },
+                orderBy: {
+                    createdAt: 'desc'  // Get the most recent report
+                }
             });
 
-            return !!report; // Return boolean indicating if report exists
+            if (!report) return false;
+
+            return report.reportStatus.includes(ReportStatus.OPEN);
         }),
 });

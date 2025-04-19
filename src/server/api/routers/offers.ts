@@ -115,16 +115,14 @@ export const offerRouter = createTRPCRouter({
     .input(
       z.object({
         listingId: z.string(),
+        buyerId: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
       const offer = await ctx.db.offer.findFirst({
         where: {
           listingId: input.listingId,
-          OR: [
-            { buyerId: ctx.session.userId },
-            { listing: { userId: ctx.session.userId } }, // seller check
-          ],
+          buyerId: input.buyerId,
         },
         orderBy: {
           createdAt: "desc",
@@ -133,6 +131,7 @@ export const offerRouter = createTRPCRouter({
 
       return offer;
     }),
+
 
 
 });

@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { api } from "~/trpc/react"; // Add this import
 
 type UserProfileCardProps = {
   userId: string;
@@ -44,6 +45,16 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
   const profileId = userId || params.get("id") || "";
 
+
+  const { data: hasReportedUser } = api.profileReport.checkProfileReportExists.useQuery(
+    { reporteeId: profileId },
+    {
+      enabled: !!profileId && !isOwnProfile,
+      // Don't refetch unnecessarily
+      refetchOnWindowFocus: false
+    }
+  );
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,10 +67,16 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle report user action
+  // Update the report handler function
   const handleReportUser = () => {
     if (!profileId) {
       alert("Unable to report: User ID not found");
+      return;
+    }
+
+    if (hasReportedUser) {
+      alert("You have already reported this user");
+      setDropdownOpen(false);
       return;
     }
 
@@ -127,10 +144,13 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
             ) : (
               <div className="py-1">
                 <div
-                  className="px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+                  className={`px-4 py-2 text-sm cursor-pointer ${hasReportedUser
+                    ? "text-gray-400"
+                    : "text-red-600 hover:bg-gray-100"
+                    }`}
                   onClick={handleReportUser}
                 >
-                  Report Profile
+                  {hasReportedUser ? "Already Reported" : "Report Profile"}
                 </div>
               </div>
             )}

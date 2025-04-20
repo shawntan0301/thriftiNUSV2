@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '~/trpc/react';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { ArrowLeft, ExternalLink, Flag, Image as ImageIcon, User, AlertCircle, Star } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Flag, Image as ImageIcon, User, AlertCircle, Star, Check } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -64,9 +64,9 @@ export default function ListingReportDetailPage() {
         <div className="flex items-center gap-2">
           {report.reportStatus.includes('OPEN') ? (
             <Button
-              variant="destructive"
+              variant="ghost"
               onClick={() => closeReport(report.id)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
             >
               <Flag className="h-4 w-4" />
               Close Report
@@ -92,20 +92,26 @@ export default function ListingReportDetailPage() {
                 <p className="text-sm font-medium text-muted-foreground">Report Type</p>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {report.reportType.map((type) => (
-                    <Badge key={type} variant="secondary">
+                    <span
+                      key={type}
+                      className="inline-flex items-center rounded-full border border-muted-foreground/20 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                    >
                       {type.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Current Status</p>
-                <Badge 
-                  variant={report.reportStatus.includes('OPEN') ? 'secondary' : 'outline'}
-                  className="mt-1"
-                >
-                  {report.reportStatus.join(', ')}
-                </Badge>
+                {report.reportStatus.includes('OPEN') ? (
+                  <span className="inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-600">
+                    OPEN
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-900">
+                    CLOSED
+                  </span>
+                )}
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Date Reported</p>

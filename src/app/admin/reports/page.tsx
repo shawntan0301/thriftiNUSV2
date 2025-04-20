@@ -13,9 +13,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
-import { AlertCircle, Search } from "lucide-react";
+import { AlertCircle, Search, Check } from "lucide-react";
 
 interface Report {
   id: string;
@@ -54,6 +53,9 @@ interface ProfileReport {
   reportType: string[];
 }
 
+type TimeFilter = "all" | "today" | "week" | "month";
+type SortOrder = "newest" | "oldest";
+
 export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
@@ -61,48 +63,81 @@ export default function ReportsPage() {
   const { data: profileReports } = api.profileReport.getAllProfileReports.useQuery();
   const router = useRouter();
 
-  // Search state
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchField, setSearchField] = useState('reporter');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
-  // Filter functions
-  const filterBySearchQuery = (item: any) => {
+  // Updated filter function to search across all fields
+  const filterBySearchQuery = (item: Report | ProfileReport) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
 
-    switch (searchField) {
-      case 'id':
-        return item.id.toLowerCase().includes(query);
-      case 'reporter':
-        return item.reporter.name.toLowerCase().includes(query);
-      case 'listing':
-        return 'listing' in item ? item.listing.title.toLowerCase().includes(query) : false;
-      case 'reportee':
-        return 'reportee' in item ? item.reportee?.name.toLowerCase().includes(query) : false;
+    const matchesId = item.id.toLowerCase().includes(query);
+    const matchesReporter = item.reporter.name.toLowerCase().includes(query);
+    
+    if ('listing' in item) {
+      return matchesId || matchesReporter || item.listing.title.toLowerCase().includes(query);
+    } else {
+      return matchesId || matchesReporter || item.reportee?.name?.toLowerCase().includes(query) || false;
+    }
+  };
+
+  const filterByStatus = (item: Report | ProfileReport) => {
+    if (statusFilter === 'all') return true;
+    return item.reportStatus.includes(statusFilter);
+  };
+
+  const filterByType = (item: Report | ProfileReport) => {
+    if (typeFilter === 'all') return true;
+    return item.reportType.includes(typeFilter);
+  };
+
+  const filterByTime = (item: Report | ProfileReport) => {
+    if (timeFilter === "all") return true;
+    
+    const itemDate = new Date(item.createdAt);
+    const now = new Date();
+    const today = new Date(now.setHours(0, 0, 0, 0));
+
+    switch (timeFilter) {
+      case "today":
+        return itemDate >= today;
+      case "week":
+        const weekAgo = new Date(now.setDate(now.getDate() - 7));
+        return itemDate >= weekAgo;
+      case "month":
+        const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
+        return itemDate >= monthAgo;
       default:
         return true;
     }
   };
 
-  const filterByStatus = (item: any) => {
-    if (statusFilter === 'all') return true;
-    return item.reportStatus.includes(statusFilter);
+  const sortByDate = (a: Report | ProfileReport, b: Report | ProfileReport) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
   };
 
-  const filterByType = (item: any) => {
-    if (typeFilter === 'all') return true;
-    return item.reportType.includes(typeFilter);
-  };
+  const filteredListingReports = listingReports
+    ?.filter(report => 
+      filterBySearchQuery(report) && 
+      filterByStatus(report) && 
+      filterByType(report) &&
+      filterByTime(report)
+    )
+    .sort(sortByDate);
 
-  const filteredListingReports = listingReports?.filter(report => 
-    filterBySearchQuery(report) && filterByStatus(report) && filterByType(report)
-  );
-
-  const filteredProfileReports = profileReports?.filter(report => 
-    filterBySearchQuery(report) && filterByStatus(report) && filterByType(report)
-  );
+  const filteredProfileReports = profileReports
+    ?.filter(report => 
+      filterBySearchQuery(report) && 
+      filterByStatus(report) && 
+      filterByType(report) &&
+      filterByTime(report)
+    )
+    .sort(sortByDate);
 
   const handleListingReportClick = (reportId: string) => {
     router.push(`/admin/reports/listing/${reportId}`);
@@ -118,7 +153,7 @@ export default function ReportsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold">Reports</CardTitle>
+              <CardTitle className="text-2xl font-bold text-[oklch(0.428_0.11_266.57)]">Reports</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Manage and review user reports for listings and profiles
               </p>
@@ -130,166 +165,184 @@ export default function ReportsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="space-y-4">
+            {/* Search and Filters */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Search Field</Label>
-              <Select value={searchField} onValueChange={setSearchField}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select field to search" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="id">ID</SelectItem>
-                  <SelectItem value="reporter">Reporter</SelectItem>
-                  <SelectItem value="listing">Listing Title</SelectItem>
-                  <SelectItem value="reportee">Reportee</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Search Query</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={`Search by ${searchField}...`}
+                  placeholder="Search by ID, Reporter, Listing Title, or Reportee..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Status Filter</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="OPEN">
-                    <Badge variant="secondary" className="mr-2">Open</Badge>
-                    Active Reports
-                  </SelectItem>
-                  <SelectItem value="CLOSED">
-                    <Badge variant="outline" className="mr-2">Closed</Badge>
-                    Resolved Reports
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Type Filter</Label>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="PHISHING_SCAMMER">Phishing/Scammer</SelectItem>
-                  <SelectItem value="MISPRICED_LISTINGS">Mispriced Listings</SelectItem>
-                  <SelectItem value="OFFENSIVE_BEHAVIOUR_OR_CONTENT">Offensive Behaviour</SelectItem>
-                  <SelectItem value="SUSPICIOUS_ACCOUNT">Suspicious Account</SelectItem>
-                  <SelectItem value="SELLING_PROHIBITED_ITEM">Prohibited Item</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-8 rounded-full border border-input bg-white px-4 hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="OPEN">Open</SelectItem>
+                    <SelectItem value="CLOSED">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
 
-          <Tabs defaultValue="listings" className="w-full">
-            <TabsList className="w-full max-w-[400px] mb-4">
-              <TabsTrigger value="listings" className="flex-1">Listing Reports</TabsTrigger>
-              <TabsTrigger value="profiles" className="flex-1">Profile Reports</TabsTrigger>
-            </TabsList>
-            <TabsContent value="listings">
-              <div className="rounded-lg border shadow-sm overflow-hidden">
-                <div className="grid grid-cols-6 bg-muted/50 border-b py-3 px-4 text-sm font-medium text-muted-foreground">
-                  <div>ID</div>
-                  <div>Reporter</div>
-                  <div>Listing</div>
-                  <div>Type</div>
-                  <div>Status</div>
-                  <div>Date</div>
-                </div>
-                <div className="divide-y">
-                  {filteredListingReports?.map((report) => (
-                    <div
-                      key={report.id}
-                      className="grid grid-cols-6 items-center py-4 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
-                      onClick={() => handleListingReportClick(report.id)}
-                    >
-                      <div className="font-mono text-xs truncate" title={report.id}>{report.id}</div>
-                      <div className="font-medium">{report.reporter.name}</div>
-                      <div>{report.listing.title}</div>
-                      <div>
-                        {report.reportType.map((type) => (
-                          <Badge key={type} variant="secondary" className="mr-1 mb-1">
-                            {type.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div>
-                        <Badge variant={report.reportStatus.includes('OPEN') ? 'secondary' : 'outline'}>
-                          {report.reportStatus.join(', ')}
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(report.createdAt).toLocaleString()}
-                      </div>
-                    </div>
-                  ))}
-                  {(!filteredListingReports || filteredListingReports.length === 0) && (
-                    <div className="py-8 text-center text-muted-foreground">
-                      No reports found matching your filters
-                    </div>
-                  )}
-                </div>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="h-8 rounded-full border border-input bg-white px-4 hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="PHISHING_SCAMMER">Phishing/Scammer</SelectItem>
+                    <SelectItem value="MISPRICED_LISTINGS">Mispriced Listings</SelectItem>
+                    <SelectItem value="OFFENSIVE_BEHAVIOUR_OR_CONTENT">Offensive Behaviour</SelectItem>
+                    <SelectItem value="SUSPICIOUS_ACCOUNT">Suspicious Account</SelectItem>
+                    <SelectItem value="SELLING_PROHIBITED_ITEM">Prohibited Item</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={timeFilter} onValueChange={(value: TimeFilter) => setTimeFilter(value)}>
+                  <SelectTrigger className="h-8 rounded-full border border-input bg-white px-4 hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="All Time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">Past Week</SelectItem>
+                    <SelectItem value="month">Past Month</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={sortOrder} onValueChange={(value: SortOrder) => setSortOrder(value)}>
+                  <SelectTrigger className="h-8 rounded-full border border-input bg-white px-4 hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Newest First" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </TabsContent>
-            <TabsContent value="profiles">
-              <div className="rounded-lg border shadow-sm overflow-hidden">
-                <div className="grid grid-cols-6 bg-muted/50 border-b py-3 px-4 text-sm font-medium text-muted-foreground">
-                  <div>ID</div>
-                  <div>Reporter</div>
-                  <div>Reportee</div>
-                  <div>Type</div>
-                  <div>Status</div>
-                  <div>Date</div>
+            </div>
+
+            {/* Tabs */}
+            <Tabs defaultValue="listings" className="w-full">
+              <TabsList className="w-full max-w-[400px] mb-4">
+                <TabsTrigger value="listings" className="flex-1">Listing Reports</TabsTrigger>
+                <TabsTrigger value="profiles" className="flex-1">Profile Reports</TabsTrigger>
+              </TabsList>
+              <TabsContent value="listings">
+                <div className="rounded-md border mt-4">
+                  <div className="grid grid-cols-6 bg-muted/50 border-b py-3 px-4 text-sm font-medium text-muted-foreground">
+                    <div>ID</div>
+                    <div>Reporter</div>
+                    <div>Listing</div>
+                    <div>Type</div>
+                    <div>Status</div>
+                    <div>Date</div>
+                  </div>
+                  <div className="divide-y">
+                    {filteredListingReports?.map((report) => (
+                      <div
+                        key={report.id}
+                        className="grid grid-cols-6 items-center py-4 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => handleListingReportClick(report.id)}
+                      >
+                        <div className="font-mono text-xs truncate" title={report.id}>{report.id}</div>
+                        <div className="font-medium">{report.reporter.name}</div>
+                        <div>{report.listing.title}</div>
+                        <div className="space-x-2 pr-4">
+                          {report.reportType.map((type) => (
+                            <span
+                              key={type}
+                              className="inline-flex items-center rounded-full border border-muted-foreground/20 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                            >
+                              {type.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
+                            </span>
+                          ))}
+                        </div>
+                        <div>
+                          {report.reportStatus.includes('OPEN') ? (
+                            <span className="inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-600">
+                              OPEN
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-900">
+                              CLOSED
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(report.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                    {(!filteredListingReports || filteredListingReports.length === 0) && (
+                      <div className="py-8 text-center text-muted-foreground">
+                        No reports found matching your filters
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="divide-y">
-                  {filteredProfileReports?.map((report) => (
-                    <div
-                      key={report.id}
-                      className="grid grid-cols-6 items-center py-4 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
-                      onClick={() => handleProfileReportClick(report.id)}
-                    >
-                      <div className="font-mono text-xs truncate" title={report.id}>{report.id}</div>
-                      <div className="font-medium">{report.reporter.name}</div>
-                      <div className="font-medium">{report.reportee?.name ?? 'Unknown User'}</div>
-                      <div>
-                        {report.reportType.map((type) => (
-                          <Badge key={type} variant="secondary" className="mr-1 mb-1">
-                            {type.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
-                          </Badge>
-                        ))}
+              </TabsContent>
+              <TabsContent value="profiles">
+                <div className="rounded-md border mt-4">
+                  <div className="grid grid-cols-6 bg-muted/50 border-b py-3 px-4 text-sm font-medium text-muted-foreground">
+                    <div>ID</div>
+                    <div>Reporter</div>
+                    <div>Reportee</div>
+                    <div>Type</div>
+                    <div>Status</div>
+                    <div>Date</div>
+                  </div>
+                  <div className="divide-y">
+                    {filteredProfileReports?.map((report) => (
+                      <div
+                        key={report.id}
+                        className="grid grid-cols-6 items-center py-4 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => handleProfileReportClick(report.id)}
+                      >
+                        <div className="font-mono text-xs truncate" title={report.id}>{report.id}</div>
+                        <div className="font-medium">{report.reporter.name}</div>
+                        <div className="font-medium">{report.reportee?.name ?? 'Unknown User'}</div>
+                        <div className="space-x-2 pr-4">
+                          {report.reportType.map((type) => (
+                            <span
+                              key={type}
+                              className="inline-flex items-center rounded-full border border-muted-foreground/20 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                            >
+                              {type.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
+                            </span>
+                          ))}
+                        </div>
+                        <div>
+                          {report.reportStatus.includes('OPEN') ? (
+                            <span className="inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-600">
+                              OPEN
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-900">
+                              CLOSED
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(report.createdAt).toLocaleString()}
+                        </div>
                       </div>
-                      <div>
-                        <Badge variant={report.reportStatus.includes('OPEN') ? 'secondary' : 'outline'}>
-                          {report.reportStatus.join(', ')}
-                        </Badge>
+                    ))}
+                    {(!filteredProfileReports || filteredProfileReports.length === 0) && (
+                      <div className="py-8 text-center text-muted-foreground">
+                        No reports found matching your filters
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(report.createdAt).toLocaleString()}
-                      </div>
-                    </div>
-                  ))}
-                  {(!filteredProfileReports || filteredProfileReports.length === 0) && (
-                    <div className="py-8 text-center text-muted-foreground">
-                      No reports found matching your filters
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -19,7 +19,7 @@ type ListingGridProps = {
 
 const ListingGrid: React.FC<ListingGridProps> = ({ listings }) => {
   return (
-    <div className="bg-gray-100 p-4 rounded-lg shadow-md w-full mt-4">
+    <div className="bg-white border p-4 rounded-lg shadow-md w-full mt-4">
       <h2 className="text-lg font-semibold mb-3">Listings</h2>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
         <AnimatePresence mode="popLayout">

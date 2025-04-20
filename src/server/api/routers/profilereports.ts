@@ -65,6 +65,121 @@ export const profileReportsRouter = createTRPCRouter({
         }),
 
     // Get a specific profile report by ID
+    getReportById: protectedProcedure
+        .input(z.object({
+            id: z.string()
+        }))
+        .query(async ({ ctx, input }) => {
+            const userRole = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.userId
+                },
+                select: {
+                    isAdmin: true,
+                }
+            });
+
+            if (!userRole?.isAdmin) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "User is not admin"
+                });
+            }
+
+            const report = await ctx.db.profileReport.findUnique({
+                where: { id: input.id },
+            });
+
+            if (!report) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Report not found",
+                });
+            }
+
+            // Get reporter and reportee details
+            const [reporter, reportee] = await Promise.all([
+                ctx.db.user.findUnique({
+                    where: { id: report.reporterId },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true,
+                    },
+                }),
+                ctx.db.user.findUnique({
+                    where: { id: report.reporteeId },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true,
+                    },
+                }),
+            ]);
+
+            if (!reporter) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Reporter not found",
+                });
+            }
+
+            return {
+                ...report,
+                reporter,
+                reportee,
+            };
+        }),
+
+    // Close a profile report
+    closeReport: protectedProcedure
+        .input(z.string())
+        .mutation(async ({ ctx, input }) => {
+            const userRole = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.userId
+                },
+                select: {
+                    isAdmin: true,
+                }
+            });
+
+            if (!userRole?.isAdmin) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "User is not admin"
+                });
+            }
+
+            const report = await ctx.db.profileReport.findUnique({
+                where: { id: input },
+            });
+
+            if (!report) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Report not found",
+                });
+            }
+
+            if (report.reportStatus.includes(ReportStatus.CLOSED)) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Report is already closed",
+                });
+            }
+
+            return await ctx.db.profileReport.update({
+                where: { id: input },
+                data: {
+                    reportStatus: [ReportStatus.CLOSED],
+                },
+            });
+        }),
+
+    // Get a specific profile report by ID
     getProfileReportById: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
@@ -235,45 +350,6 @@ export const profileReportsRouter = createTRPCRouter({
             },
         });
     }),
-
-    // Close a report (change status from OPEN to CLOSED) 
-    closeProfileReport: protectedProcedure
-        .input(z.string())
-        .mutation(async ({ ctx, input }) => {
-            const report = await ctx.db.profileReport.findUnique({
-                where: { id: input },
-            });
-            const userRole = await ctx.db.user.findUnique({
-                where: {
-                    id: ctx.session.userId,
-                },
-                select: {
-                    isAdmin: true,
-                }
-            });
-
-            if (!report) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Report not found",
-                });
-            }
-
-            // Check if user is report creator or admin
-            if (report.reporterId !== ctx.session.userId && !userRole?.isAdmin) {
-                throw new TRPCError({
-                    code: "FORBIDDEN",
-                    message: "You don't have permission to close this report",
-                });
-            }
-
-            return await ctx.db.profileReport.update({
-                where: { id: input },
-                data: {
-                    reportStatus: [ReportStatus.CLOSED],
-                },
-            });
-        }),
 
     // Check if current user has an OPEN report on a specific profile
     checkProfileReportExists: protectedProcedure

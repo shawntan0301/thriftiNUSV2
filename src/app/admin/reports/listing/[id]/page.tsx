@@ -15,14 +15,20 @@ export default function ListingReportDetailPage() {
   const router = useRouter();
   const utils = api.useUtils();
 
+  const { id } = params || {};
+
+  if (!id) {
+    return <div>Error: No listing ID provided.</div>;
+  }
+
   const { data: report, isLoading } = api.report.getReportById.useQuery(
-    params.id as string
+    id as string
   );
 
   const { mutate: closeReport } = api.report.closeReport.useMutation({
     onSuccess: () => {
       toast.success('Report closed successfully');
-      utils.report.getReportById.invalidate(params.id as string);
+      utils.report.getReportById.invalidate(id as string);
       utils.report.getAllReports.invalidate();
     },
     onError: (error) => {
@@ -201,20 +207,18 @@ export default function ListingReportDetailPage() {
                     {Array.isArray(report.listing.imageUrls) ? 
                       report.listing.imageUrls.map((url, index) => (
                         <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
-                          <Image
-                            src={`/_next/image?url=${encodeURIComponent(url)}`}
+                          <img
+                            src={url}
                             alt={`Listing image ${index + 1}`}
-                            fill
-                            className="object-cover"
+                            className="object-cover w-full h-full"
                           />
                         </div>
                       )) : (
                         <div className="relative aspect-square rounded-lg overflow-hidden border">
-                          <Image
-                            src={`/_next/image?url=${encodeURIComponent(report.listing.imageUrls)}`}
+                          <img
+                            src={report.listing.imageUrls}
                             alt="Listing image"
-                            fill
-                            className="object-cover"
+                            className="object-cover w-full h-full"
                           />
                         </div>
                       )

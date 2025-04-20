@@ -31,7 +31,7 @@ export default function OfferHeader({
       enabled: !!listingId && !!conversationBuyerId,
       refetchInterval: 1000, // ← refresh every 1s like messages
     }
-  );  
+  );
 
   const { data: currentUser } = api.user.getCurrentUser.useQuery();
 

@@ -1,6 +1,6 @@
 # ThriftiNUSV2
 
-A mobile‑first marketplace app for NUS students, built on the T3 Stack and bootstrapped with `create-t3-app`. Browse, list, and chat about pre‑loved items—all with secure authentication, image uploads, and a robust reporting system.
+A marketplace app for NUS students, built on the T3 Stack and bootstrapped with `create-t3-app`. Browse, list, and chat about pre‑loved items—all with secure authentication, image uploads, and a robust reporting system.
 
 ---
 

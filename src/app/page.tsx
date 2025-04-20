@@ -198,10 +198,11 @@ export default function Home() {
                 <div className="absolute inset-0 bg-orange-300 opacity-50"></div>
 
                 <div className="relative z-10 flex flex-col items-center justify-center">
-                  <h2 className="text-4xl sm:text-5xl font-extrabold mb-4">
-                    Join the <span className="text-white">Thrifti</span>
-                    <span className="text-yellow-300">NUS</span> Community
-                  </h2>
+                <h2 className="text-4xl sm:text-5xl font-extrabold mb-4">
+                  Join the <span style={{ color: "#243F73" }}>Thrifti</span>
+                  <span className="text-yellow-300">NUS</span> Community
+                </h2>
+
                   <p className="text-lg sm:text-xl mb-8 max-w-2xl">
                     Discover great campus deals and give pre-loved items a new life — all
                     while saving money and promoting sustainability.

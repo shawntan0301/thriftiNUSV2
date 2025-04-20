@@ -34,7 +34,7 @@ const Navbar = () => {
                 </Link>
               </div>
 
-              <div className="ml-auto flex items-center space-x-4">
+              <div className="ml-auto flex items-center space-x-4 text-base">
 
                 <SignedOut>
                   <SignInButton mode="modal">
@@ -63,7 +63,7 @@ const Navbar = () => {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth={1.5}
-                        className="w-7 h-7 text-gray-700"
+                        className="w-8 h-8 text-gray-700"
                       >
                         <path
                           strokeLinecap="round"
@@ -79,7 +79,7 @@ const Navbar = () => {
                     {/* log out button */}
                     <button
                       onClick={() => signOut()}
-                      className="p-2 rounded-full hover:bg-gray-100 transition"
+                      className="p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
                       title="Log out"
                     >
                       <svg
@@ -108,19 +108,21 @@ const Navbar = () => {
                         alt={user.name}
                         className="w-8 h-8 rounded-full object-cover border border-gray-300"
                       />
-                      <span className="text-sm font-medium text-gray-800">
+                      <span className="text-lg font-medium text-gray-800">
                         Hello, <span className="text-secondaryAccent font-semibold">{user.name}</span>
                       </span>
                     </Link>
 
                     {/* sell */}
                     <div className="ml-2 flow-root">
-                      <Link
-                        href="/sell"
-                        className={buttonVariants({
-                          variant: "secondary",
-                        })}
-                      >
+                    <Link
+                      href="/sell"
+                      className={buttonVariants({
+                        variant: "secondary",
+                        className: "text-base px-4 py-2", // <– manually increase
+                      })}
+                    >
+
                         Sell
                       </Link>
                     </div>

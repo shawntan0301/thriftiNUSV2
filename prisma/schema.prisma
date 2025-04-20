@@ -125,8 +125,6 @@ model Report {
   reporter User    @relation("FiledReports", fields: [reporterId], references: [id], onDelete: Cascade)
   listing  Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  // Prevent duplicate reports from same user on same listing
-  @@unique([reporterId, listingId])
 }
 
 model ProfileReport {
@@ -141,8 +139,7 @@ model ProfileReport {
   // Relations
   reporter User    @relation("FiledProfileReports", fields: [reporterId], references: [id], onDelete: Cascade)
 
-  // Prevent duplicate reports from same user on same listing
-  @@unique([reporterId, reporteeId])
+
 }
 
 model Offer {

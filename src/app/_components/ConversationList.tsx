@@ -22,16 +22,18 @@ export default function ConversationList({ onSelectConversation, selectedId }: P
   if (isError || !conversations || !currentUser)
     return <div className="p-4 text-red-500">Failed to load conversations.</div>;
 
-  // if 0 message, dont display
-  // conversation is created as long as user clicks "Chat with Seller", but should not display on the list
-  const conversationsWithMessages = conversations.filter(
-    (c) => c.messages && c.messages.length > 0
-  );
+  const filteredAndSorted = [...conversations]
+    .filter((c) => c.messages.length > 0 || c.listing?.offers?.length > 0)
+    .sort((a, b) => {
+      const latestA = a.messages[0]?.createdAt || a.listing.offers[0]?.createdAt || a.updatedAt;
+      const latestB = b.messages[0]?.createdAt || b.listing.offers[0]?.createdAt || b.updatedAt;
+      return new Date(latestB).getTime() - new Date(latestA).getTime();
+    });
 
   return (
     <div className="overflow-y-auto h-full px-1">
       <AnimatePresence>
-        {conversationsWithMessages.map((conversation) => (
+        {filteredAndSorted.map((conversation) => (
           <motion.div
             key={conversation.id}
             layout
@@ -43,14 +45,17 @@ export default function ConversationList({ onSelectConversation, selectedId }: P
             <SingleConversationCard
               conversation={{
                 ...conversation,
+                offers: conversation.listing?.offers ?? [],
                 listing: {
                   ...conversation.listing,
                   status: conversation.listing.status ?? "AVAILABLE",
                 },
               }}
               currentUserId={currentUser.id}
+              selected={selectedId === conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
             />
+
           </motion.div>
         ))}
       </AnimatePresence>

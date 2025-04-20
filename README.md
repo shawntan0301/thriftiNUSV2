@@ -1,29 +1,100 @@
-# Create T3 App
+# ThriftiNUSV2
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A mobile‑first marketplace app for NUS students, built on the T3 Stack and bootstrapped with `create-t3-app`. Browse, list, and chat about pre‑loved items—all with secure authentication, image uploads, and a robust reporting system.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Tech Stack
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- **Next.js** (App Router + React Server Components)
+- **TypeScript**
+- **tRPC** (end‑to‑end typesafe API)
+- **Prisma** (PostgreSQL ORM and migrations)
+- **NextAuth.js** (OAuth‑based authentication)
+- **Tailwind CSS**
+- **Uploadthing** (file‑upload handling)
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+---
 
-## Learn More
+## Features
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- **User Authentication** via email and OAuth providers
+- **Marketplace Listings**
+  - Create, edit, search, and filter items
+  - Offer and counter‑offer flows
+  - Real‑time messaging between buyer and seller
+- **Image Upload**
+  - **SingleImageUploader** for profile pictures (1 file, ≤ 4 MB, JPEG/PNG)
+  - **MultiImageUploader** for listings (up to 5 files, ≤ 4 MB each, JPEG/PNG)
+  - Thumbnail‑vs‑full‑size strategy for fast page loads and high‑res previews
+- **Reporting System**
+  - **ListingReport**: track user reports on listings (reporterId, reporteeId, listingId)
+  - **ProfileReport**: track user‑to‑user reports (reporterId, reporteeId)
+  - Spam‑prevention logic: only one open report per tuple, admin can close and re‑open
+- **Admin Dashboard** for reviewing and closing reports
+- **Responsive Design** optimized for mobile and desktop
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+---
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## Project Structure
 
-## How do I deploy this?
+.
+├── README.md
+├── package.json
+├── .env.example
+├── prisma
+│ └── schema.prisma
+├── public
+├── src
+| ├── \_components
+│ ├── server
+│ │ └── db.ts
+│ ├── app
+│ │ ├── api
+│ │ │ ├── auth
+│ │ │ │ └── [...nextauth]/route.ts
+│ │ │ └── trpc
+│ │ │ └── [trpc]/route.ts
+│ │ ├── layout.tsx
+│ │ └── page.tsx
+│ ├── components
+│ │ ├── SingleImageUploader.tsx
+│ │ └── MultiImageUploader.tsx
+│ └── server
+│ └── api
+│ └── routers
+│ └── root.ts
+│ └── trpc.ts
+| └── auth
+├── config
+├── hooks
+├── lib
+└── styles
+└── trpc
+└── utils
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Getting Started
+
+1. **Clone the repo**
+
+   ```bash
+   git clone https://github.com/shawntan0301/thriftiNUSV2.git
+   cd thriftiNUSV2
+
+   ```
+
+2. **Install Dependencies**  
+   npm install
+
+3. **Example env**
+   DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+   NEXTAUTH_SECRET=your_nextauth_secret
+   UPLOADTHING_SECRET=your_uploadthing_secret
+   UPLOADTHING_FILE_ROUTE_SINGLE=singleImageRoute
+   UPLOADTHING_FILE_ROUTE_MULTI=multiImageRoute
+
+4. **Run database migrations**
+   npx prisma migrate dev
+
+5. **Start Server**
+   npm run dev

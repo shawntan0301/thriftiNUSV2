@@ -109,4 +109,29 @@ export const offerRouter = createTRPCRouter({
 
       return acceptedOffer;
     }),
+
+  // fetch latest offer for this listing + user (buyer)
+  getLatestOfferForConversation: protectedProcedure
+    .input(
+      z.object({
+        listingId: z.string(),
+        buyerId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const offer = await ctx.db.offer.findFirst({
+        where: {
+          listingId: input.listingId,
+          buyerId: input.buyerId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return offer;
+    }),
+
+
+
 });

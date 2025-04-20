@@ -74,59 +74,59 @@ export const conversationRouter = createTRPCRouter({
 
       
 
-    //getConversationsForUser
-    getConversationsForUser: protectedProcedure
-        .query(async ({ ctx }) => {
-            const conversations = await ctx.db.conversation.findMany({
-                where: {
-                    OR: [
-                        { buyerId: ctx.session.userId },
-                        { sellerId: ctx.session.userId }
-                    ]
+    // getConversationsForUser
+    getConversationsForUser: protectedProcedure.query(async ({ ctx }) => {
+        // For regular users, return only their conversations
+        const conversations = await ctx.db.conversation.findMany({
+            where: {
+                OR: [
+                    { buyerId: ctx.session.userId },
+                    { sellerId: ctx.session.userId },
+                ],
+            },
+            include: {
+                buyer: {
+                    select: {
+                        id: true,
+                        name: true,
+                        image: true,
+                    },
                 },
-                include: {
-                    buyer: {
-                        select: {
-                            id: true,
-                            name: true,
-                            image: true
-                        }
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        image: true,
                     },
-                    seller: {
-                        select: {
-                            id: true,
-                            name: true,
-                            image: true
-                        }
+                },
+                messages: {
+                    orderBy: {
+                        createdAt: "desc",
                     },
-                    messages: {
-                        orderBy: {
-                            createdAt: 'desc'
+                    take: 1, // preview 1 message
+                },
+                listing: {
+                    select: {
+                        id: true,
+                        title: true,
+                        imageUrls: true,
+                        price: true,
+                        status: true,
+                        offers: {
+                            orderBy: { createdAt: 'desc' },
+                            take: 1, // just get latest offer
                         },
-                        take: 1 // i think the use case for this function is "view all chats"? so only need 1 msg to preview the chat
                     },
-                    listing: {
-                        select: {
-                            id: true,
-                            title: true,
-                            imageUrls: true,
-                            price: true,
-                            status: true,
-                        }
-                    }
-                }
-            });
+                },
+            },
+            orderBy: {
+                updatedAt: 'desc' // Sort by most recent activity
+            },
+        });
 
-            // sort by latest messsage time
-            const sorted = conversations.sort((a, b) => {
-                const aTime = a.messages[0]?.createdAt ?? a.updatedAt;
-                const bTime = b.messages[0]?.createdAt ?? b.updatedAt;
-                return bTime.getTime() - aTime.getTime(); // descending
-              });
-            
-              return sorted;
-            
-        }),
+        return conversations;
+    }),
+  
 
     //sendMessage
     sendMessage: protectedProcedure
@@ -179,58 +179,111 @@ export const conversationRouter = createTRPCRouter({
                 select: { isAdmin: true }
             });
 
-            // Build the where clause based on user role
-            const whereClause = user?.isAdmin
-                ? { id: input.conversationId }  // Admin can view any conversation
-                : {                             // Regular users can only view their own conversations
-                    id: input.conversationId,
-                    OR: [
-                        { buyerId: ctx.session.userId },
-                        { sellerId: ctx.session.userId }
-                    ]
-                };
+            // If user is not admin, check if they are part of the conversation
+            if (!user?.isAdmin) {
+                const conversation = await ctx.db.conversation.findFirst({
+                    where: {
+                        id: input.conversationId,
+                        OR: [
+                            { buyerId: ctx.session.userId },
+                            { sellerId: ctx.session.userId }
+                        ]
+                    },
+                    include: {
+                        buyer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            },
+                        },
+                        seller: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            },
+                        },
+                        messages: {
+                            orderBy: {
+                                createdAt: "asc",
+                            },
+                            include: {
+                                sender: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        image: true,
+                                    },
+                                },
+                            },
+                        },
+                        listing: {
+                            select: {
+                                id: true,
+                                title: true,
+                                price: true,
+                                imageUrls: true,
+                                status: true,
+                            },
+                        },
+                    },
+                });
 
-            const conversation = await ctx.db.conversation.findFirst({
-                where: whereClause,
+                if (!conversation) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Conversation not found or you don't have access to it",
+                    });
+                }
+
+                return conversation;
+            }
+
+            // For admin users, allow access to any conversation
+            const conversation = await ctx.db.conversation.findUnique({
+                where: {
+                    id: input.conversationId,
+                },
                 include: {
                     buyer: {
                         select: {
                             id: true,
                             name: true,
-                            image: true
-                        }
+                            image: true,
+                        },
                     },
                     seller: {
                         select: {
                             id: true,
                             name: true,
-                            image: true
-                        }
+                            image: true,
+                        },
                     },
                     messages: {
+                        orderBy: {
+                            createdAt: "asc",
+                        },
                         include: {
                             sender: {
                                 select: {
                                     id: true,
                                     name: true,
-                                    image: true
-                                }
-                            }
+                                    image: true,
+                                },
+                            },
                         },
-                        orderBy: {
-                            createdAt: 'asc' 
-                        }
                     },
                     listing: {
                         select: {
                             id: true,
                             title: true,
-                            imageUrls: true,
                             price: true,
+                            imageUrls: true,
                             status: true,
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
             if (!conversation) {
@@ -304,6 +357,15 @@ export const conversationRouter = createTRPCRouter({
                 }
             });
 
-            return conversations;
+            // Create a unique key for each conversation based on listing, buyer, and seller
+            const uniqueConversations = conversations.reduce((acc, curr) => {
+                const key = `${curr.listingId}-${curr.buyerId}-${curr.sellerId}`;
+                if (!acc[key] || acc[key].updatedAt < curr.updatedAt) {
+                    acc[key] = curr;
+                }
+                return acc;
+            }, {} as Record<string, typeof conversations[0]>);
+
+            return Object.values(uniqueConversations);
         }),
 });

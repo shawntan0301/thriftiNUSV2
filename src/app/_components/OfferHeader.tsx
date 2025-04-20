@@ -27,8 +27,11 @@ export default function OfferHeader({
     isLoading,
   } = api.offer.getLatestOfferForConversation.useQuery(
     { listingId, buyerId: conversationBuyerId },
-    { enabled: !!listingId && !!conversationBuyerId }
-  );
+    {
+      enabled: !!listingId && !!conversationBuyerId,
+      refetchInterval: 1000, // ← refresh every 1s like messages
+    }
+  );  
 
   const { data: currentUser } = api.user.getCurrentUser.useQuery();
 

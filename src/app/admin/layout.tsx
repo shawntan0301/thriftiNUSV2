@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   MessageSquare,
   AlertTriangle,
-  Settings,
   LogOut,
   Search,
   Bell,
@@ -94,28 +93,12 @@ export default async function AdminLayout({
               </Link>
             </div>
           </div>
-          <Separator className="my-4" />
-          <div className="px-4">
-            <h2 className="mb-2 text-xs font-semibold text-muted-foreground">
-              SETTINGS
-            </h2>
-            <div className="space-y-1">
-              <Link
-                href="/admin/settings"
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
-            </div>
-          </div>
         </nav>
         <div className="mt-auto border-t p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserButton afterSignOutUrl="/" />
               <div className="text-sm">
-                <p className="font-medium">{dbUser.name}</p>
                 <p className="text-xs text-muted-foreground">Admin</p>
               </div>
             </div>

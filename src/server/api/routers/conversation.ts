@@ -173,14 +173,25 @@ export const conversationRouter = createTRPCRouter({
             })
         )
         .query(async ({ ctx, input }) => {
-            const conversation = await ctx.db.conversation.findFirst({
-                where: {
+            // Check if user is admin
+            const user = await ctx.db.user.findUnique({
+                where: { id: ctx.session.userId },
+                select: { isAdmin: true }
+            });
+
+            // Build the where clause based on user role
+            const whereClause = user?.isAdmin
+                ? { id: input.conversationId }  // Admin can view any conversation
+                : {                             // Regular users can only view their own conversations
                     id: input.conversationId,
                     OR: [
                         { buyerId: ctx.session.userId },
                         { sellerId: ctx.session.userId }
                     ]
-                },
+                };
+
+            const conversation = await ctx.db.conversation.findFirst({
+                where: whereClause,
                 include: {
                     buyer: {
                         select: {
@@ -222,7 +233,77 @@ export const conversationRouter = createTRPCRouter({
                 }
             });
 
+            if (!conversation) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Conversation not found",
+                });
+            }
 
             return conversation;
-        })
+        }),
+
+    // Get all conversations (admin only)
+    getAllConversations: protectedProcedure
+        .query(async ({ ctx }) => {
+            // Check if user is admin
+            const user = await ctx.db.user.findUnique({
+                where: { id: ctx.session.userId },
+                select: { isAdmin: true }
+            });
+
+            if (!user?.isAdmin) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "Only admins can access all conversations",
+                });
+            }
+
+            const conversations = await ctx.db.conversation.findMany({
+                include: {
+                    buyer: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true
+                        }
+                    },
+                    seller: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true
+                        }
+                    },
+                    messages: {
+                        include: {
+                            sender: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    image: true
+                                }
+                            }
+                        },
+                        orderBy: {
+                            createdAt: 'asc'
+                        }
+                    },
+                    listing: {
+                        select: {
+                            id: true,
+                            title: true,
+                            imageUrls: true,
+                            price: true,
+                            status: true,
+                        }
+                    }
+                },
+                orderBy: {
+                    updatedAt: 'desc'
+                }
+            });
+
+            return conversations;
+        }),
 });

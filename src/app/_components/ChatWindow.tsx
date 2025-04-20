@@ -43,73 +43,68 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
   if (isLoading || !currentUser) return <div>Loading conversation...</div>;
   if (error || !conversation) return <div>Error loading chat</div>;
 
-  const currentUserId = currentUser.id;
-
-  // the other user 
-  const otherUser =
-    conversation.buyer.id === currentUserId
-      ? conversation.seller
-      : conversation.buyer;
-
-  const { listing } = conversation;
+  const { listing, buyer, seller } = conversation;
   let lastDateString = "";
 
   return (
     <div className="flex flex-col h-full bg-white">
       {/* sticky header */}
-      <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between">
-        {/* left: other user info */}
-        <Link
-          href={`/my-listings/view?id=${otherUser.id}`}
-          className="flex items-center gap-3"
-        >
-          <img
-            src={otherUser.image || "/default-profile.jpg"}
-            alt={otherUser.name}
-            className="w-11 h-11 rounded-full object-cover"
-          />
-          <span className="text-sm font-semibold text-black">
-            {otherUser.name}
-          </span>
-        </Link>
-
-        {/* right: listing info */}
-        <Link
-          href={`/listing/view?id=${listing.id}`}
-          className="flex items-center gap-3"
-        >
-          <div className="flex flex-col text-right">
-            <span className="text-sm font-semibold text-black">
-              {listing.title}
-            </span>
-            <span className="text-sm text-gray-600">
-            S$
-            {Number.isInteger(listing.price)
-                ? listing.price
-                : parseFloat(listing.price.toFixed(2)).toFixed(
-                    listing.price * 100 % 100 === 0 ? 0 :
-                    listing.price * 10 % 10 === 0 ? 2 : 2
-                )}
-            </span>
-
-          </div>
-          <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden">
+      <div className="sticky top-0 z-10 bg-white border-b px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
+          {/* Buyer info */}
+          <Link href={`/my-listings/view?id=${buyer.id}`} className="flex items-center gap-2">
             <img
-              src={listing.imageUrls[0]}
-              alt={listing.title}
-              className="object-cover w-full h-full"
+              src={buyer.image || "/default-profile.jpg"}
+              alt={buyer.name}
+              className="w-8 h-8 rounded-full object-cover"
             />
-            {listing.status !== "AVAILABLE" && (
-              <div
-                className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
-                  listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
-                }`}
-              >
-                {listing.status}
-              </div>
-            )}
-          </div>
-        </Link>
+            <div>
+              <span className="text-xs text-gray-500">Buyer</span>
+              <p className="text-sm font-medium">{buyer.name}</p>
+            </div>
+          </Link>
+
+          {/* Listing info */}
+          <Link href={`/listing/view?id=${listing.id}`} className="flex items-center gap-3">
+            <div className="flex flex-col text-right">
+              <span className="text-sm font-semibold text-black truncate max-w-[200px]">
+                {listing.title}
+              </span>
+              <span className="text-sm text-gray-600">
+                S${listing.price.toFixed(2)}
+              </span>
+            </div>
+            <div className="relative w-[50px] h-[50px] rounded-md overflow-hidden">
+              <img
+                src={listing.imageUrls[0]}
+                alt={listing.title}
+                className="object-cover w-full h-full"
+              />
+              {listing.status !== "AVAILABLE" && (
+                <div
+                  className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
+                    listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
+                  }`}
+                >
+                  {listing.status}
+                </div>
+              )}
+            </div>
+          </Link>
+
+          {/* Seller info */}
+          <Link href={`/my-listings/view?id=${seller.id}`} className="flex items-center gap-2">
+            <div className="text-right">
+              <span className="text-xs text-gray-500">Seller</span>
+              <p className="text-sm font-medium">{seller.name}</p>
+            </div>
+            <img
+              src={seller.image || "/default-profile.jpg"}
+              alt={seller.name}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          </Link>
+        </div>
       </div>
 
       {/* chatMessage */}
@@ -128,7 +123,8 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
               )}
               <ChatMessage
                 message={msg}
-                currentUserId={currentUserId} // 👈 Ensures correct message alignment
+                currentUserId={currentUser.id}
+                buyerId={buyer.id}
               />
             </div>
           );
@@ -139,22 +135,21 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
       {/* type */}
       <div className="border-t p-3 flex items-center bg-white">
         <div className="flex-1 bg-gray-100 text-sm text-black px-4 py-2 rounded-full">
-        <input
-        type="text"
-        value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
-        onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault(); // prevent newline
-            if (newMessage.trim()) {
-                sendMessageMutation.mutate({ conversationId, content: newMessage });
-            }
-            }
-        }}
-        placeholder="Type here..."
-        className="w-full bg-transparent focus:outline-none placeholder-gray-500"
-        />
-
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault(); // prevent newline
+                if (newMessage.trim()) {
+                  sendMessageMutation.mutate({ conversationId, content: newMessage });
+                }
+              }
+            }}
+            placeholder="Type here..."
+            className="w-full bg-transparent focus:outline-none placeholder-gray-500"
+          />
         </div>
         <button
           onClick={() => {

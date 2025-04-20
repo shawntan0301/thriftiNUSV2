@@ -43,34 +43,34 @@ A marketplace app for NUS students, built on the T3 Stack and bootstrapped with 
 ├── package.json
 ├── .env.example
 ├── prisma
-│   └── schema.prisma
+│ └── schema.prisma
 ├── public
 ├── src
-│   ├── _components
-│   ├── server
-│   │   └── db.ts
-│   ├── app
-│   │   ├── api
-│   │   │   ├── auth
-│   │   │   │   └── [...nextauth]/route.ts
-│   │   │   └── trpc
-│   │   │       └── [trpc]/route.ts
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── components
-│   │   ├── PfpUploader.tsx
-│   │   └── uploader.tsx
-│   ├── server
-│   │   └── api
-│   │       └── routers
-│   │           └── root.ts
-│   ├── auth
-│   ├── config
-│   ├── hooks
-│   ├── lib
-│   ├── styles
-│   ├── trpc
-│   └── utils
+│ ├── \_components
+│ ├── server
+│ │ └── db.ts
+│ ├── app
+│ │ ├── api
+│ │ │ ├── auth
+│ │ │ │ └── [...nextauth]/route.ts
+│ │ │ └── trpc
+│ │ │ └── [trpc]/route.ts
+│ │ ├── layout.tsx
+│ │ └── page.tsx
+│ ├── components
+│ │ ├── PfpUploader.tsx
+│ │ └── uploader.tsx
+│ ├── server
+│ │ └── api
+│ │ └── routers
+│ │ └── root.ts
+│ ├── auth
+│ ├── config
+│ ├── hooks
+│ ├── lib
+│ ├── styles
+│ ├── trpc
+│ └── utils
 └── tailwind.config.js
 
 ## Getting Started
@@ -98,3 +98,6 @@ A marketplace app for NUS students, built on the T3 Stack and bootstrapped with 
 
 5. **Start Server**
    npm run dev
+
+6. **Link**
+   Alternatively, you can access the app through: thriftinus.vercel.app

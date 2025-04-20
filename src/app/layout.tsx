@@ -35,7 +35,14 @@ export default function RootLayout({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         className={cn("antialised relative h-full font-sans", inter.className)}
       >
-        <ClerkProvider>
+        <ClerkProvider
+          appearance={{
+            layout: {
+              // Temporarily silences the "development instance" banner in dev
+              unsafe_disableDevelopmentModeWarnings: true,
+            },
+          }}
+        >
           <TRPCReactProvider>
             <main className="relative flex min-h-screen flex-col">
               {/* <Providers> */}

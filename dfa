@@ -1,0 +1,264 @@
+[33mcommit 71eb36c671e78671e79c024ecc798652c2964746[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 806ffcb 82a398b
+Author: shawntan0301 <shawntan0301@gmail.com>
+Date:   Fri Apr 18 21:02:05 2025 +0800
+
+    Merge branch 'main' of github.com:shawntan0301/thriftiNUSV2
+
+[33mcommit 806ffcb814f6150e37b005f866de60a147c65eb7[m
+Author: shawntan0301 <shawntan0301@gmail.com>
+Date:   Fri Apr 18 21:02:00 2025 +0800
+
+    create listing report
+
+[33mcommit 82a398b22b661f3ef4e25d79d1414e7af0fee39c[m
+Merge: bcd2f91 488aab0
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Fri Apr 18 20:49:40 2025 +0800
+
+    miscellaneous (deal methods, price, navbar)
+    
+    miscellaneous (deal methods, price, navbar)
+
+[33mcommit 488aab091f5ed70cb358a955c347d08c828421f3[m[33m ([m[1;31morigin/homepage-filters[m[33m)[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 20:47:21 2025 +0800
+
+    miscellaneous
+
+[33mcommit bcd2f91b46aedddd8a09acf7b0d410f615d93596[m
+Merge: bbf462e 271b156
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Fri Apr 18 20:13:48 2025 +0800
+
+    navbar updated
+    
+    navbar updated
+
+[33mcommit 271b156fe5361ae1ba0442551ef10a9bada26f49[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 20:11:20 2025 +0800
+
+    home page updated
+
+[33mcommit 218c57b4d4dbf8f7260c0c1c5527caba9d55323f[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 20:07:47 2025 +0800
+
+    navbar updated
+
+[33mcommit 540f72ee0534c49af21d437f4236c79e256f688a[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 20:03:09 2025 +0800
+
+    navbar updated
+
+[33mcommit bbf462ecaae6436f56f5faa4e8bbc41d6c361dfd[m
+Merge: 1ee1920 3c3433c
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Fri Apr 18 19:04:38 2025 +0800
+
+    Merge pull request #17 from homepage-filters
+    
+    search, filter, sort in homepage
+
+[33mcommit 3c3433cda1db55bb14846b4735eb50115fdba638[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 19:02:50 2025 +0800
+
+    routing after posting
+
+[33mcommit 05d3d9b2647be19accb40cc885c3f52ebfb50261[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 18:48:08 2025 +0800
+
+    filters and sorting
+
+[33mcommit 1ee1920b02bd19ebda817571b89547f207817f45[m
+Merge: 47096c8 de4dade
+Author: Mark Chew Wei Wen <156818769+mChewWW@users.noreply.github.com>
+Date:   Fri Apr 18 18:18:15 2025 +0800
+
+    Merge pull request #16 from shawntan0301/closeImagePopUp
+    
+    allows for closing of imagemodal on bg click
+
+[33mcommit de4dadeef12f6419ea5a78f8d37c0632b8aaaa93[m[33m ([m[1;31morigin/closeImagePopUp[m[33m)[m
+Author: Mark <baronchew@hotmail.com>
+Date:   Fri Apr 18 18:17:29 2025 +0800
+
+    allows for closing of imagemodal on bg click
+
+[33mcommit 47096c854bdc91481d5bb0fab8a40d8cc24c1ace[m
+Merge: 2cd4efb 670417b
+Author: Mark Chew Wei Wen <156818769+mChewWW@users.noreply.github.com>
+Date:   Fri Apr 18 18:08:46 2025 +0800
+
+    Merge pull request #15 from shawntan0301/expandListingImages
+    
+    expand listing images on click
+
+[33mcommit 670417b523ccb2d67603795c27692c5129d89232[m[33m ([m[1;31morigin/expandListingImages[m[33m)[m
+Author: Mark <baronchew@hotmail.com>
+Date:   Fri Apr 18 18:08:22 2025 +0800
+
+    expand listing images on click
+
+[33mcommit cf0962f3b6bba99c5888f4d086b92526fdbe89de[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 17:58:18 2025 +0800
+
+    search
+
+[33mcommit 2cd4efb534f598e833db71115cf895c7a7d6729c[m
+Merge: 6b8a214 356501e
+Author: Mark Chew Wei Wen <156818769+mChewWW@users.noreply.github.com>
+Date:   Fri Apr 18 17:52:12 2025 +0800
+
+    Merge pull request #14 from shawntan0301/imageNavigation
+    
+    image navigation in lisiting page
+
+[33mcommit 356501e7e4d5f450142f573cc269d9edf1e4ed1d[m[33m ([m[1;31morigin/imageNavigation[m[33m)[m
+Author: Mark <baronchew@hotmail.com>
+Date:   Fri Apr 18 17:51:55 2025 +0800
+
+    image navigation in lisiting page
+
+[33mcommit 6b8a214809f2b43a3a040bf3f2bf3664f14baca9[m
+Author: shawntan0301 <shawntan0301@gmail.com>
+Date:   Fri Apr 18 17:41:15 2025 +0800
+
+    add admin check for close report
+
+[33mcommit 1160608ebfd6c9d5c1f0c50ca6e3c501e57d30b6[m
+Merge: 28bab6a 390cd3b
+Author: shawntan0301 <shawntan0301@gmail.com>
+Date:   Fri Apr 18 17:34:29 2025 +0800
+
+    Merge branch 'main' of github.com:shawntan0301/thriftiNUSV2
+
+[33mcommit 28bab6a40e768d16eb753334fb0dac3c4cd30cfc[m
+Author: shawntan0301 <shawntan0301@gmail.com>
+Date:   Fri Apr 18 17:33:32 2025 +0800
+
+    admin checks added
+
+[33mcommit 390cd3b4427c866b8ef64fc7e4351da2991d35ff[m
+Author: Mark <baronchew@hotmail.com>
+Date:   Fri Apr 18 17:23:19 2025 +0800
+
+    removed cart
+
+[33mcommit 79cfcb036f2d8aae9c528f93f1ce667c474728ea[m
+Author: shawntan0301 <shawntan0301@gmail.com>
+Date:   Fri Apr 18 16:43:47 2025 +0800
+
+    update user schema
+
+[33mcommit 4ef1c15e0ab6e7e0e197be3a28884b2daf4ae242[m
+Merge: 7315e80 dff9137
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Fri Apr 18 03:58:09 2025 +0800
+
+    Merge pull request #13 from conversation
+    
+    conversation
+
+[33mcommit dff91372dad861fdd3e5d92e5d291bb383891359[m[33m ([m[1;31morigin/conversation[m[33m)[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Fri Apr 18 03:55:12 2025 +0800
+
+    conversation
+
+[33mcommit 7315e804cec5e4bd64f3985d156f9a34f7e92719[m
+Merge: 842d11d 1566417
+Author: Mark Chew Wei Wen <156818769+mChewWW@users.noreply.github.com>
+Date:   Fri Apr 18 03:16:09 2025 +0800
+
+    Merge pull request #12 from shawntan0301/reportFunction
+    
+    added report to db and backend
+
+[33mcommit 15664173cc6e93d97f3f3f74d28265ab602c33b8[m[33m ([m[1;31morigin/reportFunction[m[33m)[m
+Author: Mark <baronchew@hotmail.com>
+Date:   Fri Apr 18 03:15:30 2025 +0800
+
+    added report to db and backend
+
+[33mcommit 842d11d466899d8696746f980920fcecde93aa06[m
+Merge: 5d8c1d8 2fd1081
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Tue Apr 15 15:54:50 2025 +0800
+
+    Merge pull request #11 from home-page
+    
+    improved review card
+
+[33mcommit 2fd10815be0db6fb6372fd61f45e08729cbf22f0[m[33m ([m[1;31morigin/home-page[m[33m)[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Tue Apr 15 15:52:44 2025 +0800
+
+    improved review card
+
+[33mcommit 5d8c1d851d0d125172bde3a6375d1f677cf0fb13[m
+Merge: dc1b596 c84690a
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Tue Apr 15 05:14:38 2025 +0800
+
+    Merge pull request #10 from shawntan0301/home-page
+    
+    miscellaneous uiux stuff
+
+[33mcommit c84690ab7a2ec9799fa832a9af9776baec36b8f8[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Tue Apr 15 05:12:58 2025 +0800
+
+    miscellaneous
+
+[33mcommit 14079e9eeebd5f77b7fefec78d36ab1543855181[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Tue Apr 15 04:46:02 2025 +0800
+
+    miscellaneous
+
+[33mcommit dc1b596d1cb44fad82c102afe9355bc2b8265e51[m
+Merge: b4b6da2 c33bf8a
+Author: Minseo Kim <e1156473@u.nus.edu>
+Date:   Tue Apr 15 03:13:25 2025 +0800
+
+    Merge pull request #9 from home-page
+    
+    simplified home page, view others profile and listings
+
+[33mcommit c33bf8a195bf2d946c3ba3081777b12517be218b[m
+Author: mmnnsskk <minseokim9312@gmail.com>
+Date:   Tue Apr 15 03:10:42 2025 +0800
+
+    simplified home page, view others profile and listings
+
+[33mcommit b4b6da23a224076d98e5c838b4cbb4a8de0da3cf[m
+Merge: ad3b623 7b3052b
+Author: Mark Chew Wei Wen <156818769+mChewWW@users.noreply.github.com>
+Date:   Mon Apr 14 04:32:18 2025 +0800
+
+    Merge pull request #8 from shawntan0301/profilepicupload
+    
+    added single upload for profile pic
+
+[33mcommit 7b3052bcbb220942b5bd5af9fd2b00acd379d6c3[m[33m ([m[1;31morigin/profilepicupload[m[33m)[m
+Author: Mark <baronchew@hotmail.com>
+Date:   Mon Apr 14 04:31:38 2025 +0800
+
+    added single upload for profile pic
+
+[33mcommit ad3b623a92c1d4954d3ba0a2c5a4e724f2c7e15f[m
+Merge: e899fc1 f8d060f
+Author: Mark Chew Wei Wen <156818769+mChewWW@users.noreply.github.com>
+Date:   Mon Apr 14 03:10:03 2025 +0800
+
+    Merge pull request #7 from shawntan0301/view-listing
+    
+    view indiv listing + edit/delete listing
+
+[33mcommit f8d060fc6d9cc7641b2dab1c67b4ecd932886885[m[33m ([m[1;31morigin/vi

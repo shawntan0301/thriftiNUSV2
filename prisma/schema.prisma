@@ -35,26 +35,26 @@ model Session {
 }
 
 model User {
-  id                  String         @id @default(cuid())
+  id                  String          @id @default(cuid())
   name                String
-  email               String         @unique
+  email               String          @unique
   bio                 String?
   emailVerified       DateTime?
   image               String?
-  createdAt           DateTime       @default(now())
-  isAdmin             Boolean        @default(false)
+  createdAt           DateTime        @default(now())
+  isAdmin             Boolean         @default(false)
   accounts            Account[]
-  buyerConversations  Conversation[] @relation("BuyerConversations")
-  sellerConversations Conversation[] @relation("SellerConversations")
+  buyerConversations  Conversation[]  @relation("BuyerConversations")
+  sellerConversations Conversation[]  @relation("SellerConversations")
   listing             Listing[]
   messages            Message[]
-  authoredReviews     Review[]       @relation("AuthoredReviews")
-  receivedReviews     Review[]       @relation("ReceivedReviews")
+  authoredReviews     Review[]        @relation("AuthoredReviews")
+  receivedReviews     Review[]        @relation("ReceivedReviews")
   sessions            Session[]
-  savedListings       Listing[]      @relation("SavedListings")
-  filedReports        Report[]       @relation("FiledReports")
-  filedProfileReports ProfileReport[]       @relation("FiledProfileReports")
-  offersAsBuyer       Offer[]        @relation(fields: [], references: [])
+  savedListings       Listing[]       @relation("SavedListings")
+  filedReports        Report[]        @relation("FiledReports")
+  filedProfileReports ProfileReport[] @relation("FiledProfileReports")
+  offersAsBuyer       Offer[]         @relation(fields: [], references: [])
 }
 
 model Listing {
@@ -96,7 +96,7 @@ model Conversation {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id])
-  listing   Listing   @relation(fields: [listingId], references: [id])
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
   seller    User      @relation("SellerConversations", fields: [sellerId], references: [id])
   messages  Message[]
 }
@@ -124,7 +124,6 @@ model Report {
   // Relations
   reporter User    @relation("FiledReports", fields: [reporterId], references: [id], onDelete: Cascade)
   listing  Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-
 }
 
 model ProfileReport {
@@ -137,23 +136,20 @@ model ProfileReport {
   reportStatus ReportStatus[]
 
   // Relations
-  reporter User    @relation("FiledProfileReports", fields: [reporterId], references: [id], onDelete: Cascade)
-
-
+  reporter User @relation("FiledProfileReports", fields: [reporterId], references: [id], onDelete: Cascade)
 }
 
 model Offer {
-  id         String      @id @default(cuid())
-  listingId  String
-  buyerId    String
-  amount     Float
-  message    String?     
-  status     OfferStatus @default(PENDING)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  listing    Listing     @relation("ListingOffers", fields: [listingId], references: [id], onDelete: Cascade)
-  buyer      User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
-
+  id        String      @id @default(cuid())
+  listingId String
+  buyerId   String
+  amount    Float
+  message   String?
+  status    OfferStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  listing   Listing     @relation("ListingOffers", fields: [listingId], references: [id], onDelete: Cascade)
+  buyer     User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
 }
 
 enum OfferStatus {
@@ -190,8 +186,6 @@ enum ReportTopic {
   SELLING_COUNTERFEIT_ITEMS
 }
 
-
-
 enum Condition {
   BRAND_NEW
   LIKE_NEW
@@ -213,12 +207,12 @@ enum DealMethod {
   TERRACE
   BIZ
   UTOWN
-  CDE 
-  USC 
+  CDE
+  USC
   VENTUS
   CLB
   PGP
-  IT 
+  IT
   SCIENCE
 }
 

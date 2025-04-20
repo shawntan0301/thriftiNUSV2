@@ -71,7 +71,6 @@ export default function SellPage() {
           onSuccess: () => {
             alert("Listing updated successfully!");
             router.push(`/listing/view?id=${listingId}`)
-            setTimeout(() => window.location.reload(), 150);
           },
           onError: (err) => alert("Error: " + err.message),
         }

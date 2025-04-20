@@ -8,6 +8,10 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #f9fcff; /* super light blue, i added for contrast and readability */
 }

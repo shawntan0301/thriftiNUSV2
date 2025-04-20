@@ -42,10 +42,10 @@ export default function MeetTheSeller({ sellerId }: Props) {
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-[#1F3B76]">Meet the seller</h2>
 
-      {/* Seller Summary Card (Styled exactly like your screenshot) */}
+      {/* meet the seller */}
       <Link
         href={`/my-listings/view?id=${user.id}`}
-        className="flex items-center gap-4 bg-gray-100 p-4 rounded-xl shadow-sm hover:bg-gray-200 transition"
+        className="flex items-center gap-4 bg-white border p-4 rounded-xl shadow-sm hover:bg-gray-200 transition"
       >
         <img
           src={user.image ?? "/default-profile.jpg"}

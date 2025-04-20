@@ -5,6 +5,7 @@ import {
 } from "~/server/api/trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import type { Status } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
   createUser: publicProcedure
@@ -130,9 +131,18 @@ export const userRouter = createTRPCRouter({
         where: {
           userId: input.userId,
         },
-        orderBy: {
-          createdAt: "desc",
-        },
+      });
+
+      const statusPriority: Record<Status, number> = {
+        AVAILABLE: 0,
+        RESERVED: 1,
+        SOLD: 2,
+      };
+
+      listings.sort((a, b) => {
+        const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+        if (statusCompare !== 0) return statusCompare;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
 
       return listings;

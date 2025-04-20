@@ -183,17 +183,44 @@ export const listingsRouter = createTRPCRouter({
 
   // Get all listings
   getAllListings: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.listing.findMany({
-      orderBy: { createdAt: "desc" },
+    const listings = await ctx.db.listing.findMany({
       include: { user: true },
     });
+
+    const statusPriority: Record<Status, number> = {
+      AVAILABLE: 0,
+      RESERVED: 1,
+      SOLD: 2,
+    };
+
+    listings.sort((a, b) => {
+      const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+      if (statusCompare !== 0) return statusCompare;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return listings;
   }),
 
   // Get all listings by the current user
   getAllListingsById: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.listing.findMany({
+    const listings = await ctx.db.listing.findMany({
       where: { userId: ctx.session.userId },
     });
+
+    const statusPriority: Record<Status, number> = {
+      AVAILABLE: 0,
+      RESERVED: 1,
+      SOLD: 2,
+    };
+
+    listings.sort((a, b) => {
+      const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+      if (statusCompare !== 0) return statusCompare;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return listings;
   }),
 
   // Search listings by keyword (can consider adding search everytime a letter is written)
@@ -211,7 +238,7 @@ export const listingsRouter = createTRPCRouter({
   .query(async ({ ctx, input }) => {
     const { query, category, condition, priceSort, minPrice, maxPrice } = input;
 
-    return await ctx.db.listing.findMany({
+    let listings = await ctx.db.listing.findMany({
       where: {
         AND: [
           query
@@ -229,13 +256,30 @@ export const listingsRouter = createTRPCRouter({
           maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
         ],
       },
-      orderBy: priceSort
-        ? { price: priceSort }
-        : { createdAt: "desc" }, // default sort
       include: { user: true },
     });
-  }),
 
+    const statusPriority: Record<Status, number> = {
+      AVAILABLE: 0,
+      RESERVED: 1,
+      SOLD: 2,
+    };
+
+    listings.sort((a, b) => {
+      const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+      if (statusCompare !== 0) return statusCompare;
+
+      if (priceSort) {
+        return priceSort === "asc"
+          ? a.price - b.price
+          : b.price - a.price;
+      } else {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
+    return listings;
+  }),
 
 
   // Filter listings by category
@@ -250,8 +294,19 @@ export const listingsRouter = createTRPCRouter({
         where: {
           category: input.category,
         },
-        orderBy: { createdAt: "desc" },
         include: { user: true },
+      });
+
+      const statusPriority: Record<Status, number> = {
+        AVAILABLE: 0,
+        RESERVED: 1,
+        SOLD: 2,
+      };
+
+      listings.sort((a, b) => {
+        const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+        if (statusCompare !== 0) return statusCompare;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
 
       return listings;

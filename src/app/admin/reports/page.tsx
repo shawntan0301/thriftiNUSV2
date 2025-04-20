@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { api } from '~/trpc/react';
 import { useRouter } from 'next/navigation';
@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Badge } from "~/components/ui/badge";
-import { AlertCircle, Search, Check } from "lucide-react";
+import { AlertCircle, Search } from "lucide-react";
 
 interface Report {
   id: string;
@@ -63,13 +63,19 @@ export default function ReportsPage() {
   const { data: profileReports } = api.profileReport.getAllProfileReports.useQuery();
   const router = useRouter();
 
+  // Add mounted state for client-side rendering
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
-  // Updated filter function to search across all fields
   const filterBySearchQuery = (item: Report | ProfileReport) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -95,7 +101,7 @@ export default function ReportsPage() {
   };
 
   const filterByTime = (item: Report | ProfileReport) => {
-    if (timeFilter === "all") return true;
+    if (!mounted || timeFilter === "all") return true;
     
     const itemDate = new Date(item.createdAt);
     const now = new Date();
@@ -116,6 +122,7 @@ export default function ReportsPage() {
   };
 
   const sortByDate = (a: Report | ProfileReport, b: Report | ProfileReport) => {
+    if (!mounted) return 0;
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
@@ -128,7 +135,7 @@ export default function ReportsPage() {
       filterByType(report) &&
       filterByTime(report)
     )
-    .sort(sortByDate);
+    .sort(sortByDate) || [];
 
   const filteredProfileReports = profileReports
     ?.filter(report => 
@@ -137,7 +144,7 @@ export default function ReportsPage() {
       filterByType(report) &&
       filterByTime(report)
     )
-    .sort(sortByDate);
+    .sort(sortByDate) || [];
 
   const handleListingReportClick = (reportId: string) => {
     router.push(`/admin/reports/listing/${reportId}`);
@@ -146,6 +153,16 @@ export default function ReportsPage() {
   const handleProfileReportClick = (reportId: string) => {
     router.push(`/admin/reports/profile/${reportId}`);
   };
+
+  const formatDate = (date: Date | string) => {
+    if (!mounted) return ""; // Return empty string during SSR
+    return new Date(date).toLocaleString();
+  };
+
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -244,7 +261,7 @@ export default function ReportsPage() {
                     <div>Date</div>
                   </div>
                   <div className="divide-y">
-                    {filteredListingReports?.map((report) => (
+                    {filteredListingReports.map((report) => (
                       <div
                         key={report.id}
                         className="grid grid-cols-6 items-center py-4 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
@@ -275,7 +292,7 @@ export default function ReportsPage() {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(report.createdAt).toLocaleString()}
+                          {formatDate(report.createdAt)}
                         </div>
                       </div>
                     ))}
@@ -298,7 +315,7 @@ export default function ReportsPage() {
                     <div>Date</div>
                   </div>
                   <div className="divide-y">
-                    {filteredProfileReports?.map((report) => (
+                    {filteredProfileReports.map((report) => (
                       <div
                         key={report.id}
                         className="grid grid-cols-6 items-center py-4 px-4 hover:bg-muted/50 cursor-pointer transition-colors"
@@ -329,7 +346,7 @@ export default function ReportsPage() {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(report.createdAt).toLocaleString()}
+                          {formatDate(report.createdAt)}
                         </div>
                       </div>
                     ))}

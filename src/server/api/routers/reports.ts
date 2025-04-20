@@ -182,7 +182,6 @@ export const reportsRouter = createTRPCRouter({
                 },
             },
         });
-
     }),
 
     // 3. Get created reports by user ID (reports made by a user)

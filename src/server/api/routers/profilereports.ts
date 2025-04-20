@@ -149,6 +149,22 @@ export const profileReportsRouter = createTRPCRouter({
         }),
 
     getAllProfileReports: protectedProcedure.query(async ({ ctx }) => {
+        const userRole = await ctx.db.user.findUnique({
+            where: {
+                id: ctx.session.userId
+            },
+            select: {
+                isAdmin: true,
+            }
+        });
+
+        if (!userRole?.isAdmin) {
+            throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User is not admin"
+            });
+        }
+
         const reports = await ctx.db.profileReport.findMany({
             include: {
                 reporter: {

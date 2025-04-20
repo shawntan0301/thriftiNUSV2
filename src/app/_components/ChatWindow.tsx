@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import ChatMessage from "./ChatMessage";
 import Link from "next/link";
+import OfferHeader from "./OfferHeader"; // Re-add this import
 
 const formatDate = (date: Date | string) => {
   return new Date(date).toLocaleString("en-SG", {
@@ -97,9 +98,8 @@ export default function ChatWindow({ conversationId, isAdminView = false }: Chat
                   />
                   {listing.status !== "AVAILABLE" && (
                     <div
-                      className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
-                        listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
-                      }`}
+                      className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
+                        }`}
                     >
                       {listing.status}
                     </div>
@@ -149,9 +149,8 @@ export default function ChatWindow({ conversationId, isAdminView = false }: Chat
                 />
                 {listing.status !== "AVAILABLE" && (
                   <div
-                    className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
-                      listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
-                    }`}
+                    className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
+                      }`}
                   >
                     {listing.status}
                   </div>
@@ -161,6 +160,17 @@ export default function ChatWindow({ conversationId, isAdminView = false }: Chat
           )}
         </div>
       </div>
+
+
+      {!isAdminView && (
+        <OfferHeader
+          listingId={listing.id}
+          currentUserId={currentUser.id}
+          sellerId={seller.id}
+          conversationBuyerId={buyer.id}
+          refetchConversation={refetch}
+        />
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">

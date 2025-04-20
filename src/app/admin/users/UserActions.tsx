@@ -2,16 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal, Ban, Unlock } from "lucide-react";
+import { MoreHorizontal, Ban, Unlock, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserActionsProps {
   userId: string;
   isBanned: boolean;
+  isAdmin?: boolean;
   onStatusChange?: () => void;
 }
 
-export function UserActions({ userId, isBanned, onStatusChange }: UserActionsProps) {
+export function UserActions({ userId, isBanned, isAdmin, onStatusChange }: UserActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -65,40 +66,78 @@ export function UserActions({ userId, isBanned, onStatusChange }: UserActionsPro
     }
   };
 
+  const handleMakeAdmin = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/admin/set-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ targetUserId: userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Make admin action failed:", errorData);
+        throw new Error("Failed to make user admin");
+      }
+
+      const result = await response.json();
+      console.log("Make admin result:", result);
+
+      toast.success("User has been made an admin successfully");
+      setIsOpen(false);
+      if (onStatusChange) {
+        onStatusChange();
+      }
+    } catch (error) {
+      console.error("Error in make admin action:", error);
+      toast.error("Failed to make user admin. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative" ref={menuRef}>
-      <Button 
-        variant="ghost" 
-        size="sm"
-        className="h-8 w-8 p-0"
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
       >
-        <span className="sr-only">Open menu</span>
         <MoreHorizontal className="h-4 w-4" />
       </Button>
-      
+
       {isOpen && (
-        <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border bg-background shadow-md">
+        <div className="absolute right-0 z-50 mt-1 w-48 rounded-md border bg-white shadow-lg">
           <div className="py-1">
-            <h3 className="px-3 py-2 text-xs font-medium text-muted-foreground">
-              Actions
-            </h3>
-            <div className="mx-1 my-1 h-px bg-muted"></div>
+            {!isAdmin && (
+              <button
+                onClick={handleMakeAdmin}
+                disabled={isLoading}
+                className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Shield className="mr-2 h-4 w-4 text-blue-500" />
+                Make Admin
+              </button>
+            )}
             <button
-              className="flex w-full items-center px-3 py-2 text-sm text-destructive hover:bg-muted"
               onClick={handleBanAction}
               disabled={isLoading}
+              className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               {isBanned ? (
                 <>
-                  <Unlock className="mr-2 h-4 w-4" />
-                  {isLoading ? "Unbanning..." : "Unban User"}
+                  <Unlock className="mr-2 h-4 w-4 text-green-500" />
+                  Unban User
                 </>
               ) : (
                 <>
-                  <Ban className="mr-2 h-4 w-4" />
-                  {isLoading ? "Banning..." : "Ban User"}
+                  <Ban className="mr-2 h-4 w-4 text-red-500" />
+                  Ban User
                 </>
               )}
             </button>

@@ -271,6 +271,7 @@ export function UsersTable({
                 <UserActions
                   userId={user.id}
                   isBanned={user.banned || false}
+                  isAdmin={user.isAdmin}
                   onStatusChange={handleRefresh}
                 />
               </div>

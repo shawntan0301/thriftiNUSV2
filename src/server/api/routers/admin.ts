@@ -10,13 +10,23 @@ export const adminRouter = createTRPCRouter({
   getAnalytics: protectedProcedure
     .input(z.void())
     .query(async ({ ctx }) => {
-      // Check if user is admin
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.userId },
-        select: { isAdmin: true },
+      // Check if user is admin using Clerk
+      const response = await fetch(`${CLERK_API_BASE}/users/${ctx.session.userId}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (!user?.isAdmin) {
+      if (!response.ok) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to verify admin status",
+        });
+      }
+
+      const clerkUser = await response.json();
+      if (!clerkUser.public_metadata?.role || clerkUser.public_metadata.role !== "admin") {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Only admins can access analytics",
@@ -84,30 +94,130 @@ export const adminRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      // Check if user is admin
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.userId },
-        select: { isAdmin: true },
+      // Check if user is admin using Clerk
+      const adminCheckResponse = await fetch(`${CLERK_API_BASE}/users/${ctx.session.userId}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (!user?.isAdmin) {
+      if (!adminCheckResponse.ok) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to verify admin status",
+        });
+      }
+
+      const adminUser = await adminCheckResponse.json();
+      if (!adminUser.public_metadata?.role || adminUser.public_metadata.role !== "admin") {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Only admins can access user management",
         });
       }
 
-      // Build the where clause based on filters
-      const where: Prisma.UserWhereInput = {
-        ...(input.search
-          ? {
-              OR: [
-                { name: { contains: input.search, mode: "insensitive" as Prisma.QueryMode } },
-                { email: { contains: input.search, mode: "insensitive" as Prisma.QueryMode } },
-              ],
+      // Get all users from Clerk first
+      const clerkResponse = await fetch(`${CLERK_API_BASE}/users`, {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!clerkResponse.ok) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch users from Clerk",
+        });
+      }
+
+      const clerkUsers = await clerkResponse.json();
+      
+      // Get users from database with review counts
+      const dbUsers = await ctx.db.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          createdAt: true,
+          _count: {
+            select: {
+              receivedReviews: true
             }
-          : {}),
-      };
+          },
+          receivedReviews: {
+            select: {
+              rating: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      // Merge Clerk and DB user data
+      const mergedUsers = dbUsers.map(dbUser => {
+        const clerkUser = clerkUsers.find((cu: any) => cu.id === dbUser.id);
+        return {
+          ...dbUser,
+          banned: clerkUser?.banned ?? false,
+          isAdmin: clerkUser?.public_metadata?.role === "admin",
+          reviewCount: dbUser._count.receivedReviews,
+          averageRating: dbUser.receivedReviews.length > 0
+            ? dbUser.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / dbUser.receivedReviews.length
+            : null,
+        };
+      });
+
+      // Apply filters
+      let filteredUsers = mergedUsers;
+
+      // Search filter
+      if (input.search) {
+        const searchLower = input.search.toLowerCase();
+        filteredUsers = filteredUsers.filter(user => 
+          user.name.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Status filter
+      if (input.statusFilter !== "all") {
+        filteredUsers = filteredUsers.filter(user => {
+          switch (input.statusFilter) {
+            case "active":
+              return !user.isAdmin && !user.banned;
+            case "admin":
+              return user.isAdmin;
+            case "banned":
+              return user.banned;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Reviews filter
+      if (input.reviewsFilter !== "all") {
+        filteredUsers = filteredUsers.filter(user => {
+          const reviewCount = user.reviewCount;
+          switch (input.reviewsFilter) {
+            case "0":
+              return reviewCount === 0;
+            case "1-5":
+              return reviewCount >= 1 && reviewCount <= 5;
+            case "6-10":
+              return reviewCount >= 6 && reviewCount <= 10;
+            case "10+":
+              return reviewCount > 10;
+            default:
+              return true;
+          }
+        });
+      }
 
       // Account age filter
       if (input.accountAgeFilter !== "all") {
@@ -129,118 +239,9 @@ export const adminRouter = createTRPCRouter({
           default:
             dateFilter = now;
         }
-        where.createdAt = { gte: dateFilter };
-      }
-
-      // Get users from database with review counts
-      const users = await ctx.db.user.findMany({
-        where,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          createdAt: true,
-          isAdmin: true,
-          _count: {
-            select: {
-              receivedReviews: true
-            }
-          },
-          receivedReviews: {
-            select: {
-              rating: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-      // Filter by review count if needed
-      let filteredByReviews = users;
-      if (input.reviewsFilter !== "all") {
-        filteredByReviews = users.filter(user => {
-          const reviewCount = user._count.receivedReviews;
-          switch (input.reviewsFilter) {
-            case "0":
-              return reviewCount === 0;
-            case "1-5":
-              return reviewCount >= 1 && reviewCount <= 5;
-            case "6-10":
-              return reviewCount >= 6 && reviewCount <= 10;
-            case "10+":
-              return reviewCount > 10;
-            default:
-              return true;
-          }
-        });
-      }
-
-      // Get banned status for all users from Clerk
-      const usersWithBanStatus = await Promise.all(
-        filteredByReviews.map(async (user) => {
-          try {
-            const response = await fetch(`${CLERK_API_BASE}/users/${user.id}`, {
-              headers: {
-                Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (!response.ok) {
-              console.error(`Failed to fetch user ${user.id} ban status:`, response.statusText);
-              return {
-                ...user,
-                banned: false,
-                reviewCount: user._count.receivedReviews,
-                averageRating: user.receivedReviews.length > 0
-                  ? user.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / user.receivedReviews.length
-                  : null,
-              };
-            }
-
-            const clerkUser = await response.json();
-            return {
-              ...user,
-              banned: clerkUser.banned,
-              reviewCount: user._count.receivedReviews,
-              averageRating: user.receivedReviews.length > 0
-                ? user.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / user.receivedReviews.length
-                : null,
-            };
-          } catch (error) {
-            console.error(`Error fetching ban status for user ${user.id}:`, error);
-            return {
-              ...user,
-              banned: false,
-              reviewCount: user._count.receivedReviews,
-              averageRating: user.receivedReviews.length > 0
-                ? user.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / user.receivedReviews.length
-                : null,
-            };
-          }
-        })
-      );
-
-      // Apply status and rating filters after getting ban status
-      let filteredUsers = usersWithBanStatus;
-
-      // Status filter
-      if (input.statusFilter !== "all") {
-        filteredUsers = filteredUsers.filter(user => {
-          switch (input.statusFilter) {
-            case "active":
-              return !user.isAdmin && !user.banned;
-            case "admin":
-              return user.isAdmin;
-            case "banned":
-              return user.banned;
-            default:
-              return true;
-          }
-        });
+        filteredUsers = filteredUsers.filter(user => 
+          new Date(user.createdAt) >= dateFilter
+        );
       }
 
       // Rating filter
@@ -251,7 +252,7 @@ export const adminRouter = createTRPCRouter({
         );
       }
 
-      // Apply pagination after all filters
+      // Apply pagination
       const paginatedUsers = filteredUsers.slice(
         (input.page - 1) * input.limit,
         input.page * input.limit

@@ -2,10 +2,18 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal, UserCog, Ban } from "lucide-react";
+import { MoreHorizontal, UserCog, Ban, Unlock } from "lucide-react";
+import { toast } from "sonner";
 
-export function UserActions() {
+interface UserActionsProps {
+  userId: string;
+  isBanned: boolean;
+  onStatusChange?: () => void;
+}
+
+export function UserActions({ userId, isBanned, onStatusChange }: UserActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +29,35 @@ export function UserActions() {
     };
   }, []);
 
+  const handleBanAction = async () => {
+    try {
+      setIsLoading(true);
+      const endpoint = isBanned ? "/api/admin/unban-user" : "/api/admin/ban-user";
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ targetUserId: userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(isBanned ? "Failed to unban user" : "Failed to ban user");
+      }
+
+      toast.success(isBanned ? "User has been unbanned successfully" : "User has been banned successfully");
+      setIsOpen(false);
+      if (onStatusChange) {
+        onStatusChange();
+      }
+    } catch (error) {
+      console.error("Error in ban action:", error);
+      toast.error(isBanned ? "Failed to unban user. Please try again." : "Failed to ban user. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       <Button 
@@ -28,6 +65,7 @@ export function UserActions() {
         size="sm"
         className="h-8 w-8 p-0"
         onClick={() => setIsOpen(!isOpen)}
+        disabled={isLoading}
       >
         <span className="sr-only">Open menu</span>
         <MoreHorizontal className="h-4 w-4" />
@@ -42,7 +80,11 @@ export function UserActions() {
             <div className="mx-1 my-1 h-px bg-muted"></div>
             <button
               className="flex w-full items-center px-3 py-2 text-sm text-foreground hover:bg-muted"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                if (onStatusChange) onStatusChange();
+              }}
+              disabled={isLoading}
             >
               <UserCog className="mr-2 h-4 w-4" />
               Change Status
@@ -50,10 +92,20 @@ export function UserActions() {
             <div className="mx-1 my-1 h-px bg-muted"></div>
             <button
               className="flex w-full items-center px-3 py-2 text-sm text-destructive hover:bg-muted"
-              onClick={() => setIsOpen(false)}
+              onClick={handleBanAction}
+              disabled={isLoading}
             >
-              <Ban className="mr-2 h-4 w-4" />
-              Ban User
+              {isBanned ? (
+                <>
+                  <Unlock className="mr-2 h-4 w-4" />
+                  {isLoading ? "Unbanning..." : "Unban User"}
+                </>
+              ) : (
+                <>
+                  <Ban className="mr-2 h-4 w-4" />
+                  {isLoading ? "Banning..." : "Ban User"}
+                </>
+              )}
             </button>
           </div>
         </div>

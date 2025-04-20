@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { api } from '~/trpc/react';
 import { useRouter } from 'next/navigation';
@@ -59,11 +59,17 @@ type SortOrder = "newest" | "oldest";
 export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
-  const { data: listingReports } = api.report.getAllReports.useQuery();
-  const { data: profileReports } = api.profileReport.getAllProfileReports.useQuery();
-  const router = useRouter();
+  const { data: listingReports, isLoading: isListingLoading } = api.report.getAllReports.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  });
+  
+  const { data: profileReports, isLoading: isProfileLoading } = api.profileReport.getAllProfileReports.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    staleTime: 30000,
+  });
 
-  // Add mounted state for client-side rendering
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -76,31 +82,32 @@ export default function ReportsPage() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
-  const filterBySearchQuery = (item: Report | ProfileReport) => {
+  // Memoize filter functions to prevent unnecessary recalculations
+  const filterBySearchQuery = useMemo(() => (item: Report | ProfileReport) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
 
     const matchesId = item.id.toLowerCase().includes(query);
-    const matchesReporter = item.reporter.name.toLowerCase().includes(query);
+    const matchesReporter = item.reporter?.name?.toLowerCase().includes(query) ?? false;
     
     if ('listing' in item) {
-      return matchesId || matchesReporter || item.listing.title.toLowerCase().includes(query);
+      return matchesId || matchesReporter || (item.listing?.title?.toLowerCase().includes(query) ?? false);
     } else {
-      return matchesId || matchesReporter || item.reportee?.name?.toLowerCase().includes(query) || false;
+      return matchesId || matchesReporter || (item.reportee?.name?.toLowerCase().includes(query) ?? false);
     }
-  };
+  }, [searchQuery]);
 
-  const filterByStatus = (item: Report | ProfileReport) => {
+  const filterByStatus = useMemo(() => (item: Report | ProfileReport) => {
     if (statusFilter === 'all') return true;
-    return item.reportStatus.includes(statusFilter);
-  };
+    return item.reportStatus?.includes(statusFilter) ?? false;
+  }, [statusFilter]);
 
-  const filterByType = (item: Report | ProfileReport) => {
+  const filterByType = useMemo(() => (item: Report | ProfileReport) => {
     if (typeFilter === 'all') return true;
-    return item.reportType.includes(typeFilter);
-  };
+    return item.reportType?.includes(typeFilter) ?? false;
+  }, [typeFilter]);
 
-  const filterByTime = (item: Report | ProfileReport) => {
+  const filterByTime = useMemo(() => (item: Report | ProfileReport) => {
     if (!mounted || timeFilter === "all") return true;
     
     const itemDate = new Date(item.createdAt);
@@ -119,32 +126,37 @@ export default function ReportsPage() {
       default:
         return true;
     }
-  };
+  }, [timeFilter, mounted]);
 
-  const sortByDate = (a: Report | ProfileReport, b: Report | ProfileReport) => {
+  const sortByDate = useMemo(() => (a: Report | ProfileReport, b: Report | ProfileReport) => {
     if (!mounted) return 0;
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-  };
+  }, [sortOrder, mounted]);
 
-  const filteredListingReports = listingReports
-    ?.filter(report => 
-      filterBySearchQuery(report) && 
-      filterByStatus(report) && 
-      filterByType(report) &&
-      filterByTime(report)
-    )
-    .sort(sortByDate) || [];
+  // Memoize filtered results
+  const filteredListingReports = useMemo(() => 
+    listingReports
+      ?.filter(report => 
+        filterBySearchQuery(report) && 
+        filterByStatus(report) && 
+        filterByType(report) &&
+        filterByTime(report)
+      )
+      .sort(sortByDate) || []
+  , [listingReports, filterBySearchQuery, filterByStatus, filterByType, filterByTime, sortByDate]);
 
-  const filteredProfileReports = profileReports
-    ?.filter(report => 
-      filterBySearchQuery(report) && 
-      filterByStatus(report) && 
-      filterByType(report) &&
-      filterByTime(report)
-    )
-    .sort(sortByDate) || [];
+  const filteredProfileReports = useMemo(() => 
+    profileReports
+      ?.filter(report => 
+        filterBySearchQuery(report) && 
+        filterByStatus(report) && 
+        filterByType(report) &&
+        filterByTime(report)
+      )
+      .sort(sortByDate) || []
+  , [profileReports, filterBySearchQuery, filterByStatus, filterByType, filterByTime, sortByDate]);
 
   const handleListingReportClick = (reportId: string) => {
     router.push(`/admin/reports/listing/${reportId}`);
@@ -162,6 +174,14 @@ export default function ReportsPage() {
   // Don't render anything until mounted to prevent hydration mismatch
   if (!mounted) {
     return null;
+  }
+
+  if (isListingLoading || isProfileLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground">Loading reports...</div>
+      </div>
+    );
   }
 
   return (

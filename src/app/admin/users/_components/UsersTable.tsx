@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Star, Check, Search } from "lucide-react";
+import { Star, Check, Search, Ban } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { UserActions } from "../UserActions";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ interface User {
   isAdmin: boolean;
   reviewCount: number;
   averageRating: number | null;
+  banned?: boolean;
 }
 
 interface UsersTableProps {
@@ -33,6 +34,10 @@ export function UsersTable({ initialUsers, initialPage, initialSearch, totalPage
   const handleSearch = (value: string) => {
     setSearch(value);
     router.push(`?page=1&search=${encodeURIComponent(value)}`);
+  };
+
+  const handleStatusChange = () => {
+    router.refresh();
   };
 
   return (
@@ -89,7 +94,12 @@ export function UsersTable({ initialUsers, initialPage, initialSearch, totalPage
                 </div>
               </div>
               <div className="col-span-2 px-4">
-                {user.isAdmin ? (
+                {user.banned ? (
+                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+                    <Ban className="mr-1 h-3 w-3" />
+                    Banned
+                  </span>
+                ) : user.isAdmin ? (
                   <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                     Admin
                   </span>
@@ -112,7 +122,11 @@ export function UsersTable({ initialUsers, initialPage, initialSearch, totalPage
                 >
                   <a href={`/my-listings/view?id=${user.id}`}>View Profile</a>
                 </Button>
-                <UserActions />
+                <UserActions 
+                  userId={user.id} 
+                  isBanned={user.banned || false}
+                  onStatusChange={handleStatusChange} 
+                />
               </div>
             </div>
           ))}

@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import ChatMessage from "./ChatMessage";
-import ChatHeader from "./ChatHeader";
-import OfferHeader from "./OfferHeader";
+import Link from "next/link";
 
 const formatDate = (date: Date | string) => {
   return new Date(date).toLocaleString("en-SG", {
@@ -15,16 +14,18 @@ const formatDate = (date: Date | string) => {
 
 type ChatWindowProps = {
   conversationId: string;
+  isAdminView?: boolean;
 };
 
-export default function ChatWindow({ conversationId }: ChatWindowProps) {
+export default function ChatWindow({ conversationId, isAdminView = false }: ChatWindowProps) {
   const { data: currentUser } = api.user.getCurrentUser.useQuery();
   const { data: conversation, isLoading, error, refetch } =
     api.conversation.getFullConversation.useQuery(
       { conversationId },
       {
         enabled: !!conversationId,
-        refetchInterval: 1000, // refetch every 3 seconds, dont need to refresh to see messages
+        refetchInterval: (data) => (document.hasFocus() ? 3000 : false), // refetch every 3 seconds only when window is focused
+        refetchIntervalInBackground: false,
       }
     );
 
@@ -49,33 +50,119 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
   if (isLoading || !currentUser) return <div>Loading conversation...</div>;
   if (error || !conversation) return <div>Error loading chat</div>;
 
-  const currentUserId = currentUser.id;
-  const isSeller = conversation.seller.id === currentUserId;
-
-  const otherUser =
-    conversation.buyer.id === currentUserId
-      ? conversation.seller
-      : conversation.buyer;
-
-  const { listing } = conversation;
+  const { listing, buyer, seller } = conversation;
   let lastDateString = "";
+
+  // Helper function to get profile image URL
+  const getProfileImage = (image: string | null) => image || "/default-profile.jpg";
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* TOP sticky HEADER user + listing info */}
-      <ChatHeader otherUser={otherUser} listing={listing} />
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-white border-b px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
+          {isAdminView ? (
+            <>
+              {/* Admin view header */}
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">Buyer</span>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={getProfileImage(buyer.image)}
+                      alt={buyer.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <Link href={`/my-listings/view?id=${buyer.id}`} className="text-sm font-medium hover:underline">
+                      {buyer.name}
+                    </Link>
+                  </div>
+                </div>
+              </div>
 
-      {/* SECOND sticky header for offer (if exists) */}
-      <OfferHeader
-        listingId={listing.id}
-        currentUserId={currentUserId}
-        sellerId={conversation.seller.id}
-        conversationBuyerId={conversation.buyer.id}
-        refetchConversation={refetch}
-      />
+              <Link href={`/listing/view?id=${listing.id}`} className="flex items-center gap-3">
+                <div className="flex flex-col text-center">
+                  <span className="text-sm font-semibold text-black truncate max-w-[200px]">
+                    {listing.title}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    S${listing.price.toFixed(2)}
+                  </span>
+                </div>
+                <div className="relative w-[50px] h-[50px] rounded-md overflow-hidden">
+                  <img
+                    src={listing.imageUrls[0] || "/default-image.jpg"}
+                    alt={listing.title}
+                    className="object-cover w-full h-full"
+                  />
+                  {listing.status !== "AVAILABLE" && (
+                    <div
+                      className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
+                        listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
+                      }`}
+                    >
+                      {listing.status}
+                    </div>
+                  )}
+                </div>
+              </Link>
 
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-gray-500">Seller</span>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/my-listings/view?id=${seller.id}`} className="text-sm font-medium hover:underline">
+                      {seller.name}
+                    </Link>
+                    <img
+                      src={getProfileImage(seller.image)}
+                      alt={seller.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Normal user view header */}
+              <div className="flex items-center gap-3">
+                <img
+                  src={getProfileImage(currentUser.id === buyer.id ? seller.image : buyer.image)}
+                  alt={currentUser.id === buyer.id ? seller.name : buyer.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                  <p className="font-medium">
+                    {currentUser.id === buyer.id ? seller.name : buyer.name}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {listing.title} • S${listing.price.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              <div className="relative w-[40px] h-[40px] rounded-md overflow-hidden">
+                <img
+                  src={listing.imageUrls[0] || "/default-image.jpg"}
+                  alt={listing.title}
+                  className="object-cover w-full h-full"
+                />
+                {listing.status !== "AVAILABLE" && (
+                  <div
+                    className={`absolute bottom-0 left-0 w-full text-[10px] font-bold text-white text-center py-0.5 ${
+                      listing.status === "SOLD" ? "bg-[#1F3B76]" : "bg-[#F38325]"
+                    }`}
+                  >
+                    {listing.status}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-      {/* chat messages */}
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
         {conversation.messages.map((msg) => {
           const msgDate = formatDate(msg.createdAt);
@@ -91,7 +178,9 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
               )}
               <ChatMessage
                 message={msg}
-                currentUserId={currentUserId}
+                currentUserId={currentUser.id}
+                isAdminView={isAdminView}
+                buyerId={buyer.id}
               />
             </div>
           );
@@ -99,7 +188,7 @@ export default function ChatWindow({ conversationId }: ChatWindowProps) {
         <div ref={bottomRef} />
       </div>
 
-      {/* chat input box */}
+      {/* Input */}
       <div className="border-t p-3 flex items-center bg-white">
         <div className="flex-1 bg-gray-100 text-sm text-black px-4 py-2 rounded-full">
           <input

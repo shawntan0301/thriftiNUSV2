@@ -106,25 +106,52 @@ export const listingsRouter = createTRPCRouter({
     }),
 
 
-  // Delete a listing
-  deleteListing: protectedProcedure
+    deleteListing: protectedProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
       const listing = await ctx.db.listing.findUnique({ where: { id: input } });
-
-      if (!listing)
+  
+      if (!listing) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Listing not found",
         });
-      if (listing.userId !== ctx.session.userId)
+      }
+  
+      if (listing.userId !== ctx.session.userId) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Listing not found",
+          code: "UNAUTHORIZED",
+          message: "Not authorized to delete this listing",
         });
-
-      return await ctx.db.listing.delete({ where: { id: input } });
+      }
+  
+      // Step 1: Get all conversations related to this listing
+      const conversations = await ctx.db.conversation.findMany({
+        where: { listingId: input },
+        select: { id: true },
+      });
+  
+      const conversationIds = conversations.map(c => c.id);
+  
+      // Step 2: Delete all messages in those conversations
+      await ctx.db.message.deleteMany({
+        where: {
+          conversationId: { in: conversationIds },
+        },
+      });
+  
+      // Step 3: Delete the conversations
+      await ctx.db.conversation.deleteMany({
+        where: { listingId: input },
+      });
+  
+      // Step 4: Delete the listing
+      return await ctx.db.listing.delete({
+        where: { id: input },
+      });
     }),
+  
+
 
   // Deletes any listing (action can only be performed by admin)
   deleteAnyListing: protectedProcedure

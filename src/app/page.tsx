@@ -188,33 +188,33 @@ export default function Home() {
             </div>
           </section>
 
-{/* CTA Join Section */}
-<section className="py-20 px-6 sm:px-12 bg-[#FFF9F1]">
-  <div className="max-w-6xl mx-auto rounded-2xl overflow-hidden shadow-xl">
-    <div
-      className="relative bg-cover bg-center text-white text-center px-6 py-20 sm:px-12"
-      style={{ backgroundImage: "url('/assets/cta-bg.jpg')" }} // replace with your actual path
-    >
-      <div className="absolute inset-0 bg-orange-300 opacity-50"></div>
+          {/* CTA Join Section */}
+          <section className="py-20 px-6 sm:px-12 bg-[#FFF9F1]">
+            <div className="max-w-6xl mx-auto rounded-2xl overflow-hidden shadow-xl">
+              <div
+                className="relative bg-cover bg-center text-white text-center px-6 py-20 sm:px-12"
+                style={{ backgroundImage: "url('/assets/cta-bg.jpg')" }} // replace with your actual path
+              >
+                <div className="absolute inset-0 bg-orange-300 opacity-50"></div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center">
-        <h2 className="text-4xl sm:text-5xl font-extrabold mb-4">
-          Join the <span className="text-white">Thrifti</span>
-          <span className="text-yellow-300">NUS</span> Community
-        </h2>
-        <p className="text-lg sm:text-xl mb-8 max-w-2xl">
-          Discover great campus deals and give pre-loved items a new life — all
-          while saving money and promoting sustainability.
-        </p>
-        <SignInButton mode="modal">
-          <button className="bg-white text-orange-600 font-semibold px-8 py-3 rounded-full shadow hover:bg-gray-100 transition cursor-pointer text-lg">
-            Sign In
-          </button>
-        </SignInButton>
-      </div>
-    </div>
-  </div>
-</section>
+                <div className="relative z-10 flex flex-col items-center justify-center">
+                  <h2 className="text-4xl sm:text-5xl font-extrabold mb-4">
+                    Join the <span className="text-white">Thrifti</span>
+                    <span className="text-yellow-300">NUS</span> Community
+                  </h2>
+                  <p className="text-lg sm:text-xl mb-8 max-w-2xl">
+                    Discover great campus deals and give pre-loved items a new life — all
+                    while saving money and promoting sustainability.
+                  </p>
+                  <SignInButton mode="modal">
+                    <button className="bg-white text-orange-600 font-semibold px-8 py-3 rounded-full shadow hover:bg-gray-100 transition cursor-pointer text-lg">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                </div>
+              </div>
+            </div>
+          </section>
 
 
 

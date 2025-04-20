@@ -17,13 +17,13 @@ const MyListingPanel = ({ listingId, status }: MyListingPanelProps) => {
   const deleteListing = api.listings.deleteListing.useMutation({
     onSuccess: () => {
       ctx.listings.getAllListings.invalidate();
-      router.push("/");
+      router.back(); // Go back to previous page
       setTimeout(() => window.location.reload(), 150);
     },
     onError: (error) => {
       alert(error.message);
     },
-  });
+  });  
 
   const updateStatus = api.listings.updateStatus.useMutation({
     onSuccess: (data) => {

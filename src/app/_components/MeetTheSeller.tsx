@@ -45,7 +45,7 @@ export default function MeetTheSeller({ sellerId }: Props) {
       {/* Seller Summary Card (Styled exactly like your screenshot) */}
       <Link
         href={`/my-listings/view?id=${user.id}`}
-        className="flex items-center gap-4 bg-gray-100 p-4 rounded-xl shadow-sm hover:bg-gray-200 transition"
+        className="flex items-center gap-4 bg-white border p-4 rounded-xl shadow-sm hover:bg-gray-200 transition"
       >
         <img
           src={user.image ?? "/default-profile.jpg"}

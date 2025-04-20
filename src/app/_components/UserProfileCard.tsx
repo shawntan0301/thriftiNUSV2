@@ -81,7 +81,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
   return (
     <>
-      <div className="rounded-xl p-4 shadow-md w-full bg-gray-100 flex items-center justify-between">
+      <div className="rounded-xl p-4 shadow-md w-full bg-white border flex items-center justify-between">
         {/* Profile Info */}
         <div className="flex items-center gap-4">
           <img

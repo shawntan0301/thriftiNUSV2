@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal, UserCog, Ban, Unlock } from "lucide-react";
+import { MoreHorizontal, Ban, Unlock } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserActionsProps {
@@ -33,6 +33,8 @@ export function UserActions({ userId, isBanned, onStatusChange }: UserActionsPro
     try {
       setIsLoading(true);
       const endpoint = isBanned ? "/api/admin/unban-user" : "/api/admin/ban-user";
+      console.log("Sending request to:", endpoint, { targetUserId: userId });
+      
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -42,8 +44,13 @@ export function UserActions({ userId, isBanned, onStatusChange }: UserActionsPro
       });
 
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Ban action failed:", errorData);
         throw new Error(isBanned ? "Failed to unban user" : "Failed to ban user");
       }
+
+      const result = await response.json();
+      console.log("Ban action result:", result);
 
       toast.success(isBanned ? "User has been unbanned successfully" : "User has been banned successfully");
       setIsOpen(false);
@@ -77,18 +84,6 @@ export function UserActions({ userId, isBanned, onStatusChange }: UserActionsPro
             <h3 className="px-3 py-2 text-xs font-medium text-muted-foreground">
               Actions
             </h3>
-            <div className="mx-1 my-1 h-px bg-muted"></div>
-            <button
-              className="flex w-full items-center px-3 py-2 text-sm text-foreground hover:bg-muted"
-              onClick={() => {
-                setIsOpen(false);
-                if (onStatusChange) onStatusChange();
-              }}
-              disabled={isLoading}
-            >
-              <UserCog className="mr-2 h-4 w-4" />
-              Change Status
-            </button>
             <div className="mx-1 my-1 h-px bg-muted"></div>
             <button
               className="flex w-full items-center px-3 py-2 text-sm text-destructive hover:bg-muted"

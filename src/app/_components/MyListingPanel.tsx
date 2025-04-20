@@ -17,7 +17,7 @@ const MyListingPanel = ({ listingId, status }: MyListingPanelProps) => {
   const deleteListing = api.listings.deleteListing.useMutation({
     onSuccess: () => {
       ctx.listings.getAllListings.invalidate();
-      router.back(); // Go back to previous page
+      router.push("/"); 
       setTimeout(() => window.location.reload(), 150);
     },
     onError: (error) => {
